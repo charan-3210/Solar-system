@@ -1,111 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Cosmos Live</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+  >
+
+  <title>COSMOS — Universe Explorer</title>
+
+  <meta
+    name="description"
+    content="COSMOS is an interactive 3D universe explorer."
+  >
+
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div id="app"></div>
 
+<!-- Loading screen -->
 <div id="loading">
-    <div class="loading-ring"></div>
-    <strong>COSMOS LIVE</strong>
-    <small>Initializing 3D universe</small>
+  <div class="loading-core"></div>
+
+  <div class="loading-title">
+    COSMOS
+  </div>
+
+  <div class="loading-sub">
+    INITIALIZING DEEP SPACE
+  </div>
 </div>
 
-<header>
-    <div>
-        <div class="logo">COSMOS</div>
-        <div class="subtitle">LIVE UNIVERSE EXPLORER</div>
-    </div>
+<!-- Top -->
+<header class="topbar">
 
-    <div class="actions">
-        <button id="present">PRESENT</button>
-        <button id="searchButton">SEARCH</button>
+  <div class="logo">
+    <div class="logo-main">C O S M O S</div>
+    <div class="logo-sub">
+      LIVE UNIVERSE EXPLORER
     </div>
+  </div>
+
+  <div class="actions">
+    <button id="presentBtn">PRESENT</button>
+    <button id="searchBtn">SEARCH</button>
+  </div>
+
 </header>
 
-<div id="searchPanel" class="panel hidden">
-    <div class="panelTitle">
-        SEARCH COSMOS
-        <button id="closeSearch">×</button>
-    </div>
 
-    <input id="searchInput"
-           placeholder="Earth, Mars, Andromeda, TRAPPIST-1...">
+<!-- Search -->
+<div id="searchPanel" class="glass search-panel hidden">
 
-    <div id="results"></div>
+  <div class="panel-caption">
+    SEARCH UNIVERSE
+  </div>
+
+  <div class="search-row">
+
+    <input
+      id="searchInput"
+      type="search"
+      placeholder="Search galaxy, planet..."
+    >
+
+    <button id="searchGo">
+      GO
+    </button>
+
+  </div>
+
+  <div id="searchResults"></div>
+
 </div>
 
-<div id="objectPanel" class="panel hidden">
-    <button id="closeObject" class="close">×</button>
 
-    <small id="objectType">ASTRONOMICAL OBJECT</small>
+<!-- Object information -->
+<div id="objectPanel" class="glass object-panel hidden">
 
-    <h2 id="objectName">Earth</h2>
+  <button
+    id="closeObject"
+    class="close"
+  >
+    ×
+  </button>
 
-    <p id="objectDescription"></p>
+  <div
+    id="objectCategory"
+    class="panel-caption"
+  >
+    GALAXY
+  </div>
 
-    <div class="objectGrid">
-        <div>
-            <span>TYPE</span>
-            <b id="objectDataType"></b>
-        </div>
+  <h2 id="objectName">
+    Andromeda Galaxy
+  </h2>
 
-        <div>
-            <span>STATUS</span>
-            <b id="objectStatus"></b>
-        </div>
+  <p id="objectDescription"></p>
 
-        <div>
-            <span>SCALE</span>
-            <b id="objectScale"></b>
-        </div>
+  <div class="metadata">
+
+    <div>
+      <span>TYPE</span>
+      <strong id="objectType"></strong>
     </div>
+
+    <div>
+      <span>STATUS</span>
+      <strong id="objectStatus"></strong>
+    </div>
+
+  </div>
+
 </div>
 
+
+<!-- Bottom interface -->
 <div class="bottom">
 
-    <div class="timeBox">
+  <!-- Scale -->
+  <div class="glass scale-box">
 
-        <small>ASTRONOMICAL TIME</small>
+    <div class="panel-caption">
+      SCALE
+    </div>
 
-        <strong id="timeText">PRESENT</strong>
+    <input
+      id="scaleSlider"
+      type="range"
+      min="0"
+      max="100"
+      value="0"
+    >
 
-        <input id="date"
-               type="datetime-local">
+    <div class="scale-info">
 
-        <div class="timeButtons">
-            <button id="previous">− DAY</button>
-            <button id="next">+ DAY</button>
-        </div>
+      <span>UNIVERSE</span>
+
+      <strong id="scaleText">
+        DEEP UNIVERSE
+      </strong>
+
+      <span>STREET</span>
 
     </div>
 
-    <div class="scaleBox">
+  </div>
 
-        <small>SCALE</small>
 
-        <input id="scale"
-               type="range"
-               min="0"
-               max="7"
-               step="1"
-               value="4">
+  <!-- Time -->
+  <div class="glass time-box">
 
-        <div class="scaleLabels">
-            <span>UNIVERSE</span>
-            <b id="scaleText">SOLAR SYSTEM</b>
-            <span>STREET</span>
-        </div>
+    <div class="panel-caption">
+      ASTRONOMICAL TIME
+    </div>
+
+    <div id="timeDisplay">
+      --
+    </div>
+
+    <input
+      id="dateInput"
+      type="datetime-local"
+    >
+
+    <div class="time-buttons">
+
+      <button id="previousDay">
+        − DAY
+      </button>
+
+      <button id="nextDay">
+        + DAY
+      </button>
 
     </div>
+
+  </div>
 
 </div>
+
+
+<!-- Navigation -->
+<div id="navigation">
+
+  <span class="desktop-navigation">
+    DRAG ROTATE&nbsp;&nbsp; · &nbsp;&nbsp;SCROLL ZOOM&nbsp;&nbsp; · &nbsp;&nbsp;RIGHT DRAG PAN
+  </span>
+
+  <span class="mobile-navigation">
+    DRAG ROTATE&nbsp;&nbsp; · &nbsp;&nbsp;PINCH ZOOM
+  </span>
+
+</div>
+
 
 <script type="module" src="app.js"></script>
 
