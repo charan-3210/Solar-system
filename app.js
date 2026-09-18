@@ -4,43 +4,30 @@ import * as THREE from
 import { OrbitControls } from
 "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/controls/OrbitControls.js";
 
-import { EffectComposer } from
-"https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/postprocessing/EffectComposer.js";
 
-import { RenderPass } from
-"https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/postprocessing/RenderPass.js";
-
-import { UnrealBloomPass } from
-"https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+/* ============================================================
+   COSMOS — FAST START ENGINE
+============================================================ */
 
 
-/* =========================================================
-   COSMOS
-   Visual rebuild
-========================================================= */
+/* ============================================================
+   DEVICE
+============================================================ */
 
-
-/* =========================================================
-   BASIC
-========================================================= */
-
-const app =
-  document.getElementById("app");
-
-const mobile =
+const isMobile =
   /Android|iPhone|iPad|iPod/i
     .test(navigator.userAgent);
 
 
-/* =========================================================
+/* ============================================================
    RENDERER
-========================================================= */
+============================================================ */
 
 const renderer =
   new THREE.WebGLRenderer({
 
     antialias:
-      !mobile,
+      !isMobile,
 
     powerPreference:
       "high-performance",
@@ -50,10 +37,11 @@ const renderer =
 
   });
 
+
 renderer.setPixelRatio(
   Math.min(
     window.devicePixelRatio || 1,
-    mobile ? 1.35 : 1.8
+    isMobile ? 1.25 : 1.6
   )
 );
 
@@ -69,16 +57,18 @@ renderer.toneMapping =
   THREE.ACESFilmicToneMapping;
 
 renderer.toneMappingExposure =
-  1.25;
+  1.15;
 
-app.appendChild(
-  renderer.domElement
-);
+document
+  .getElementById("app")
+  .appendChild(
+    renderer.domElement
+  );
 
 
-/* =========================================================
+/* ============================================================
    SCENE
-========================================================= */
+============================================================ */
 
 const scene =
   new THREE.Scene();
@@ -89,9 +79,9 @@ scene.background =
   );
 
 
-/* =========================================================
+/* ============================================================
    CAMERA
-========================================================= */
+============================================================ */
 
 const camera =
   new THREE.PerspectiveCamera(
@@ -99,19 +89,19 @@ const camera =
     window.innerWidth /
       window.innerHeight,
     .01,
-    100000
+    150000
   );
 
 camera.position.set(
   0,
-  600,
-  3200
+  900,
+  4200
 );
 
 
-/* =========================================================
+/* ============================================================
    CONTROLS
-========================================================= */
+============================================================ */
 
 const controls =
   new OrbitControls(
@@ -126,7 +116,7 @@ controls.dampingFactor =
   .065;
 
 controls.rotateSpeed =
-  .48;
+  .5;
 
 controls.zoomSpeed =
   .85;
@@ -141,10 +131,10 @@ controls.screenSpacePanning =
   true;
 
 controls.minDistance =
-  .15;
+  .2;
 
 controls.maxDistance =
-  50000;
+  100000;
 
 controls.target.set(
   0,
@@ -153,44 +143,9 @@ controls.target.set(
 );
 
 
-/* =========================================================
-   BLOOM
-========================================================= */
-
-const composer =
-  new EffectComposer(
-    renderer
-  );
-
-const renderPass =
-  new RenderPass(
-    scene,
-    camera
-  );
-
-composer.addPass(
-  renderPass
-);
-
-const bloom =
-  new UnrealBloomPass(
-    new THREE.Vector2(
-      window.innerWidth,
-      window.innerHeight
-    ),
-    mobile ? .65 : .9,
-    .65,
-    .08
-  );
-
-composer.addPass(
-  bloom
-);
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
+/* ============================================================
+   BASIC HELPERS
+============================================================ */
 
 function random(
   min,
@@ -213,100 +168,16 @@ function clamp(
 }
 
 
-/* =========================================================
-   GLOW TEXTURE
-========================================================= */
-
-function makeGlowTexture() {
-
-  const size = 256;
-
-  const canvas =
-    document.createElement(
-      "canvas"
-    );
-
-  canvas.width =
-    size;
-
-  canvas.height =
-    size;
-
-  const ctx =
-    canvas.getContext(
-      "2d"
-    );
-
-  const g =
-    ctx.createRadialGradient(
-      size / 2,
-      size / 2,
-      0,
-      size / 2,
-      size / 2,
-      size / 2
-    );
-
-  g.addColorStop(
-    0,
-    "rgba(255,255,255,1)"
-  );
-
-  g.addColorStop(
-    .08,
-    "rgba(255,255,255,.95)"
-  );
-
-  g.addColorStop(
-    .25,
-    "rgba(190,215,255,.55)"
-  );
-
-  g.addColorStop(
-    .55,
-    "rgba(80,130,255,.12)"
-  );
-
-  g.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-  );
-
-  ctx.fillStyle =
-    g;
-
-  ctx.fillRect(
-    0,
-    0,
-    size,
-    size
-  );
-
-  const texture =
-    new THREE.CanvasTexture(
-      canvas
-    );
-
-  texture.colorSpace =
-    THREE.SRGBColorSpace;
-
-  return texture;
-}
-
-const glowTexture =
-  makeGlowTexture();
-
-
-/* =========================================================
-   STAR FIELD
-========================================================= */
+/* ============================================================
+   FAST STAR FIELD
+============================================================ */
 
 function createStars() {
 
   const count =
-    mobile
-      ? 11000
-      : 26000;
+    isMobile
+      ? 6500
+      : 14000;
 
   const positions =
     new Float32Array(
@@ -318,7 +189,7 @@ function createStars() {
       count * 3
     );
 
-  const color =
+  const starColor =
     new THREE.Color();
 
   for (
@@ -328,10 +199,10 @@ function createStars() {
   ) {
 
     const radius =
-      6000 *
+      9000 *
       Math.pow(
         Math.random(),
-        .38
+        .42
       );
 
     const theta =
@@ -343,28 +214,19 @@ function createStars() {
         random(-1, 1)
       );
 
-    const x =
+    positions[i * 3] =
       radius *
       Math.sin(phi) *
       Math.cos(theta);
 
-    const y =
+    positions[i * 3 + 1] =
       radius *
       Math.cos(phi);
 
-    const z =
+    positions[i * 3 + 2] =
       radius *
       Math.sin(phi) *
       Math.sin(theta);
-
-    positions[i * 3] =
-      x;
-
-    positions[i * 3 + 1] =
-      y;
-
-    positions[i * 3 + 2] =
-      z;
 
 
     const temperature =
@@ -374,27 +236,27 @@ function createStars() {
       temperature < .15
     ) {
 
-      color.setRGB(
+      starColor.setRGB(
         1,
-        .75,
-        .58
+        .72,
+        .5
       );
 
     } else if (
       temperature < .45
     ) {
 
-      color.setRGB(
+      starColor.setRGB(
         1,
         .9,
-        .75
+        .72
       );
 
     } else if (
-      temperature < .8
+      temperature < .82
     ) {
 
-      color.setRGB(
+      starColor.setRGB(
         .78,
         .88,
         1
@@ -402,21 +264,22 @@ function createStars() {
 
     } else {
 
-      color.setRGB(
-        .6,
-        .75,
+      starColor.setRGB(
+        .55,
+        .7,
         1
       );
+
     }
 
     colors[i * 3] =
-      color.r;
+      starColor.r;
 
     colors[i * 3 + 1] =
-      color.g;
+      starColor.g;
 
     colors[i * 3 + 2] =
-      color.b;
+      starColor.b;
   }
 
 
@@ -444,9 +307,9 @@ function createStars() {
     new THREE.PointsMaterial({
 
       size:
-        mobile
-          ? 1.2
-          : 1.45,
+        isMobile
+          ? 1.15
+          : 1.4,
 
       vertexColors:
         true,
@@ -479,747 +342,124 @@ function createStars() {
   return points;
 }
 
+
+/*
+  IMPORTANT:
+  Stars are created immediately.
+*/
+
 const stars =
   createStars();
 
 
-/* =========================================================
-   NEBULA CLOUDS
-========================================================= */
+/* ============================================================
+   GLOW TEXTURE
+============================================================ */
 
-function createNebula(
-  position,
-  color,
-  size,
-  opacity
-) {
+function createGlowTexture() {
 
-  const sprite =
-    new THREE.Sprite(
-
-      new THREE.SpriteMaterial({
-
-        map:
-          glowTexture,
-
-        color,
-
-        transparent:
-          true,
-
-        opacity,
-
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      })
-
+  const canvas =
+    document.createElement(
+      "canvas"
     );
 
-  sprite.position.set(
-    ...position
+  canvas.width =
+    256;
+
+  canvas.height =
+    256;
+
+  const ctx =
+    canvas.getContext(
+      "2d"
+    );
+
+  const gradient =
+    ctx.createRadialGradient(
+      128,
+      128,
+      0,
+      128,
+      128,
+      128
+    );
+
+  gradient.addColorStop(
+    0,
+    "rgba(255,255,255,1)"
   );
 
-  sprite.scale.set(
-    size,
-    size,
-    1
+  gradient.addColorStop(
+    .08,
+    "rgba(255,255,255,.95)"
   );
 
-  scene.add(
-    sprite
+  gradient.addColorStop(
+    .25,
+    "rgba(180,210,255,.5)"
   );
 
-  return sprite;
+  gradient.addColorStop(
+    .55,
+    "rgba(80,130,255,.1)"
+  );
+
+  gradient.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+  );
+
+  ctx.fillStyle =
+    gradient;
+
+  ctx.fillRect(
+    0,
+    0,
+    256,
+    256
+  );
+
+  return new THREE.CanvasTexture(
+    canvas
+  );
 }
 
 
-const nebulas = [
+const glowTexture =
+  createGlowTexture();
 
-  [[-900, 700, -900], 0x284f9b, 1100, .035],
 
-  [[1100, -600, -1200], 0x6e2f87, 900, .035],
+/* ============================================================
+   GALAXY TEXTURES
+   ONLY FOUR ARE CREATED.
+   They are reused for all galaxies.
+============================================================ */
 
-  [[-1500, -900, 500], 0x1e5681, 1000, .03],
+const galaxyTextureCache =
+  new Map();
 
-  [[1700, 900, 600], 0x7a3e4c, 900, .025],
-
-  [[0, -1300, -1500], 0x284c88, 1200, .025]
-
-];
-
-nebulas.forEach(
-  data =>
-    createNebula(
-      ...data
-    )
-);
-
-
-/* =========================================================
-   GALAXY DATA
-========================================================= */
-
-const GALAXIES = [
-
-  {
-    name:
-      "Milky Way",
-
-    type:
-      "Barred Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "The galaxy containing our Solar System. The Milky Way is a barred spiral galaxy with a central bulge, disk and extended halo.",
-
-    position:
-      [0, 0, 0],
-
-    radius:
-      170,
-
-    arms:
-      4,
-
-    color:
-      0xbdd8ff
-  },
-
-  {
-    name:
-      "Andromeda Galaxy (M31)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A large spiral galaxy in the Local Group and one of the nearest major galaxies to the Milky Way.",
-
-    position:
-      [650, 120, -260],
-
-    radius:
-      125,
-
-    arms:
-      3,
-
-    color:
-      0xd9e5ff,
-
-    tilt:
-      .4
-  },
-
-  {
-    name:
-      "Triangulum Galaxy (M33)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A spiral galaxy and member of the Local Group.",
-
-    position:
-      [-500, -80, -390],
-
-    radius:
-      82,
-
-    arms:
-      3,
-
-    color:
-      0x9fc8ff,
-
-    tilt:
-      .3
-  },
-
-  {
-    name:
-      "Large Magellanic Cloud",
-
-    type:
-      "Irregular Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "An irregular satellite galaxy of the Milky Way.",
-
-    position:
-      [350, -230, 400],
-
-    radius:
-      48,
-
-    irregular:
-      true,
-
-    color:
-      0xa8c8ff
-  },
-
-  {
-    name:
-      "Small Magellanic Cloud",
-
-    type:
-      "Dwarf Irregular Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A dwarf irregular galaxy associated with the Milky Way.",
-
-    position:
-      [440, -280, 480],
-
-    radius:
-      35,
-
-    irregular:
-      true,
-
-    color:
-      0x9fb7ff
-  },
-
-  {
-    name:
-      "Whirlpool Galaxy (M51)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "An interacting spiral galaxy system in the constellation Canes Venatici.",
-
-    position:
-      [-900, 350, -650],
-
-    radius:
-      100,
-
-    arms:
-      2,
-
-    color:
-      0xc7dcff,
-
-    tilt:
-      .25
-  },
-
-  {
-    name:
-      "Sombrero Galaxy (M104)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A galaxy distinguished by its bright central bulge and prominent dust lane.",
-
-    position:
-      [1000, -360, -850],
-
-    radius:
-      95,
-
-    arms:
-      2,
-
-    color:
-      0xffd5a0,
-
-    tilt:
-      1
-  },
-
-  {
-    name:
-      "Pinwheel Galaxy (M101)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A large asymmetric spiral galaxy in Ursa Major.",
-
-    position:
-      [-1000, 520, 380],
-
-    radius:
-      120,
-
-    arms:
-      5,
-
-    color:
-      0xc9e0ff
-  },
-
-  {
-    name:
-      "Bode's Galaxy (M81)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A grand-design spiral galaxy in Ursa Major.",
-
-    position:
-      [900, 600, 550],
-
-    radius:
-      90,
-
-    arms:
-      2,
-
-    color:
-      0xd8e6ff
-  },
-
-  {
-    name:
-      "Cigar Galaxy (M82)",
-
-    type:
-      "Starburst Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "An actively star-forming galaxy interacting with nearby M81.",
-
-    position:
-      [850, 670, 600],
-
-    radius:
-      55,
-
-    elongated:
-      true,
-
-    irregular:
-      true,
-
-    color:
-      0xffb978
-  },
-
-  {
-    name:
-      "Black Eye Galaxy (M64)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A spiral galaxy known for its prominent dark dust feature.",
-
-    position:
-      [-1250, -420, -150],
-
-    radius:
-      78,
-
-    arms:
-      2,
-
-    color:
-      0xd6e1ff
-  },
-
-  {
-    name:
-      "Sunflower Galaxy (M63)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A flocculent spiral galaxy with a bright central region.",
-
-    position:
-      [1250, 260, -400],
-
-    radius:
-      82,
-
-    arms:
-      5,
-
-    color:
-      0xd5e2ff
-  },
-
-  {
-    name:
-      "Southern Pinwheel Galaxy (M83)",
-
-    type:
-      "Barred Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A barred spiral galaxy visible in the southern sky.",
-
-    position:
-      [-720, -650, 700],
-
-    radius:
-      92,
-
-    arms:
-      4,
-
-    color:
-      0xc0dcff
-  },
-
-  {
-    name:
-      "Centaurus A",
-
-    type:
-      "Peculiar Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A prominent nearby galaxy with a strong dust lane and active central region.",
-
-    position:
-      [680, -780, 820],
-
-    radius:
-      80,
-
-    elongated:
-      true,
-
-    irregular:
-      true,
-
-    color:
-      0xffc18a
-  },
-
-  {
-    name:
-      "Sculptor Galaxy (NGC 253)",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A nearby spiral galaxy and prominent star-forming system.",
-
-    position:
-      [-1200, -600, 850],
-
-    radius:
-      90,
-
-    arms:
-      3,
-
-    color:
-      0xbdd8ff
-  },
-
-  {
-    name:
-      "Messier 87",
-
-    type:
-      "Giant Elliptical Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A giant elliptical galaxy associated with the Virgo Cluster.",
-
-    position:
-      [1550, 650, -900],
-
-    radius:
-      130,
-
-    elliptical:
-      true,
-
-    color:
-      0xffddb0
-  },
-
-  {
-    name:
-      "Messier 49",
-
-    type:
-      "Elliptical Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A giant elliptical galaxy in the Virgo Cluster region.",
-
-    position:
-      [1660, 760, -980],
-
-    radius:
-      90,
-
-    elliptical:
-      true,
-
-    color:
-      0xffd8a7
-  },
-
-  {
-    name:
-      "Messier 60",
-
-    type:
-      "Elliptical Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A giant elliptical galaxy in the Virgo Cluster region.",
-
-    position:
-      [1730, 700, -820],
-
-    radius:
-      78,
-
-    elliptical:
-      true,
-
-    color:
-      0xffd3a1
-  },
-
-  {
-    name:
-      "NGC 1300",
-
-    type:
-      "Barred Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A well-studied barred spiral galaxy.",
-
-    position:
-      [-1700, 220, -760],
-
-    radius:
-      90,
-
-    arms:
-      2,
-
-    color:
-      0xc7ddff
-  },
-
-  {
-    name:
-      "NGC 1365",
-
-    type:
-      "Barred Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A large barred spiral galaxy in the Fornax region.",
-
-    position:
-      [1850, -330, 820],
-
-    radius:
-      110,
-
-    arms:
-      2,
-
-    color:
-      0xc5ddff
-  },
-
-  {
-    name:
-      "NGC 4038",
-
-    type:
-      "Interacting Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "One of the two major galaxies forming the Antennae system.",
-
-    position:
-      [-1850, 700, 920],
-
-    radius:
-      65,
-
-    irregular:
-      true,
-
-    color:
-      0xffbd8b
-  },
-
-  {
-    name:
-      "NGC 4039",
-
-    type:
-      "Interacting Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "The second major galaxy in the Antennae system.",
-
-    position:
-      [-1780, 735, 960],
-
-    radius:
-      62,
-
-    irregular:
-      true,
-
-    color:
-      0xffbd8b
-  },
-
-  {
-    name:
-      "NGC 6744",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A large nearby spiral galaxy whose appearance is often compared broadly with the Milky Way.",
-
-    position:
-      [1800, 920, 160],
-
-    radius:
-      125,
-
-    arms:
-      4,
-
-    color:
-      0xc5ddff
-  },
-
-  {
-    name:
-      "NGC 4258",
-
-    type:
-      "Spiral Galaxy",
-
-    status:
-      "CATALOGUED",
-
-    description:
-      "A nearby spiral galaxy known for its warped disk.",
-
-    position:
-      [-1600, -850, -430],
-
-    radius:
-      95,
-
-    arms:
-      3,
-
-    color:
-      0xc5d9ff
-  }
-
-];
-
-
-/* =========================================================
-   GALAXY TEXTURE
-========================================================= */
 
 function createGalaxyTexture(
-  data
+  style
 ) {
 
+  if (
+    galaxyTextureCache.has(
+      style
+    )
+  ) {
+
+    return galaxyTextureCache.get(
+      style
+    );
+
+  }
+
+
   const size =
-    mobile ? 768 : 1024;
+    isMobile
+      ? 384
+      : 512;
 
   const canvas =
     document.createElement(
@@ -1243,14 +483,8 @@ function createGalaxyTexture(
   const cy =
     size / 2;
 
-  const base =
-    new THREE.Color(
-      data.color
-    );
 
-  /*
-    Outer soft light.
-  */
+  /* Soft outer glow */
 
   const glow =
     ctx.createRadialGradient(
@@ -1264,32 +498,17 @@ function createGalaxyTexture(
 
   glow.addColorStop(
     0,
-    `rgba(
-      ${Math.floor(base.r * 255)},
-      ${Math.floor(base.g * 255)},
-      ${Math.floor(base.b * 255)},
-      .75
-    )`
+    "rgba(230,240,255,.75)"
   );
 
   glow.addColorStop(
-    .12,
-    `rgba(
-      ${Math.floor(base.r * 255)},
-      ${Math.floor(base.g * 255)},
-      ${Math.floor(base.b * 255)},
-      .45
-    )`
+    .15,
+    "rgba(180,210,255,.35)"
   );
 
   glow.addColorStop(
-    .35,
-    `rgba(
-      ${Math.floor(base.r * 255)},
-      ${Math.floor(base.g * 255)},
-      ${Math.floor(base.b * 255)},
-      .12
-    )`
+    .4,
+    "rgba(100,150,255,.09)"
   );
 
   glow.addColorStop(
@@ -1308,54 +527,51 @@ function createGalaxyTexture(
   );
 
 
-  /*
-    Elliptical galaxy.
-  */
-
   if (
-    data.elliptical
+    style ===
+    "elliptical"
   ) {
 
-    const gradient =
+    const core =
       ctx.createRadialGradient(
         cx,
         cy,
-        5,
+        0,
         cx,
         cy,
-        size * .44
+        size * .4
       );
 
-    gradient.addColorStop(
+    core.addColorStop(
       0,
-      "rgba(255,245,215,.95)"
+      "rgba(255,250,230,1)"
     );
 
-    gradient.addColorStop(
-      .15,
-      "rgba(255,220,170,.75)"
+    core.addColorStop(
+      .2,
+      "rgba(255,220,175,.72)"
     );
 
-    gradient.addColorStop(
-      .45,
-      "rgba(230,205,165,.24)"
+    core.addColorStop(
+      .5,
+      "rgba(220,190,150,.2)"
     );
 
-    gradient.addColorStop(
+    core.addColorStop(
       1,
       "rgba(0,0,0,0)"
     );
 
     ctx.fillStyle =
-      gradient;
+      core;
 
     ctx.beginPath();
 
     ctx.ellipse(
       cx,
       cy,
-      size * .38,
-      size * .20,
+      size * .4,
+      size * .22,
       0,
       0,
       Math.PI * 2
@@ -1365,12 +581,12 @@ function createGalaxyTexture(
 
   } else {
 
-    /*
-      Spiral galaxy.
-    */
-
     const arms =
-      data.arms || 3;
+      style ===
+      "barred"
+        ? 2
+        : 4;
+
 
     for (
       let arm = 0;
@@ -1388,28 +604,28 @@ function createGalaxyTexture(
       for (
         let t = 0;
         t < Math.PI * 4.5;
-        t += .018
+        t += .025
       ) {
 
-        const radius =
+        const r =
           t /
           (Math.PI * 4.5) *
           size *
           .42;
 
         const angle =
-          t * 1.7 +
+          t * 1.65 +
           offset;
 
         const x =
           cx +
           Math.cos(angle) *
-          radius;
+          r;
 
         const y =
           cy +
           Math.sin(angle) *
-          radius *
+          r *
           .46;
 
         if (
@@ -1425,36 +641,29 @@ function createGalaxyTexture(
             y
           );
         }
+
       }
 
       ctx.strokeStyle =
-        `rgba(
-          ${Math.floor(base.r * 255)},
-          ${Math.floor(base.g * 255)},
-          ${Math.floor(base.b * 255)},
-          .34
-        )`;
+        style === "irregular"
+          ? "rgba(190,190,255,.18)"
+          : "rgba(190,215,255,.3)";
 
       ctx.lineWidth =
         size * .025;
 
       ctx.shadowBlur =
-        25;
+        18;
 
       ctx.shadowColor =
-        `rgb(
-          ${Math.floor(base.r * 255)},
-          ${Math.floor(base.g * 255)},
-          ${Math.floor(base.b * 255)}
-        )`;
+        "rgba(130,180,255,.8)";
 
       ctx.stroke();
+
     }
 
 
-    /*
-      Central bulge.
-    */
+    /* Central bulge */
 
     const core =
       ctx.createRadialGradient(
@@ -1463,7 +672,7 @@ function createGalaxyTexture(
         0,
         cx,
         cy,
-        size * .17
+        size * .18
       );
 
     core.addColorStop(
@@ -1472,13 +681,13 @@ function createGalaxyTexture(
     );
 
     core.addColorStop(
-      .15,
-      "rgba(255,240,205,.9)"
+      .2,
+      "rgba(255,230,190,.85)"
     );
 
     core.addColorStop(
-      .5,
-      "rgba(255,215,165,.25)"
+      .55,
+      "rgba(255,210,160,.15)"
     );
 
     core.addColorStop(
@@ -1494,71 +703,13 @@ function createGalaxyTexture(
     ctx.arc(
       cx,
       cy,
-      size * .18,
+      size * .19,
       0,
       Math.PI * 2
     );
 
     ctx.fill();
-  }
 
-
-  /*
-    Random dust/star particles.
-  */
-
-  for (
-    let i = 0;
-    i < 1800;
-    i++
-  ) {
-
-    const a =
-      Math.random() *
-      Math.PI *
-      2;
-
-    const r =
-      Math.pow(
-        Math.random(),
-        .65
-      ) *
-      size *
-      .43;
-
-    const x =
-      cx +
-      Math.cos(a) *
-      r;
-
-    const y =
-      cy +
-      Math.sin(a) *
-      r *
-      .46;
-
-    const alpha =
-      Math.random() *
-      .4;
-
-    ctx.fillStyle =
-      `rgba(
-        255,
-        255,
-        255,
-        ${alpha}
-      )`;
-
-    const s =
-      Math.random() *
-      2.2;
-
-    ctx.fillRect(
-      x,
-      y,
-      s,
-      s
-    );
   }
 
 
@@ -1571,18 +722,200 @@ function createGalaxyTexture(
     THREE.SRGBColorSpace;
 
   texture.minFilter =
-    THREE.LinearMipmapLinearFilter;
+    THREE.LinearFilter;
 
   texture.magFilter =
     THREE.LinearFilter;
+
+  galaxyTextureCache.set(
+    style,
+    texture
+  );
 
   return texture;
 }
 
 
-/* =========================================================
-   GALAXY OBJECTS
-========================================================= */
+/* ============================================================
+   GALAXY DATA
+============================================================ */
+
+const GALAXIES = [
+
+  ["Milky Way",
+   "Barred Spiral Galaxy",
+   "The galaxy containing our Solar System.",
+   [0,0,0],
+   180,
+   "barred"],
+
+  ["Andromeda Galaxy (M31)",
+   "Spiral Galaxy",
+   "A large spiral galaxy in the Local Group.",
+   [650,120,-250],
+   130,
+   "spiral"],
+
+  ["Triangulum Galaxy (M33)",
+   "Spiral Galaxy",
+   "A spiral galaxy and member of the Local Group.",
+   [-500,-80,-380],
+   85,
+   "spiral"],
+
+  ["Large Magellanic Cloud",
+   "Irregular Galaxy",
+   "An irregular satellite galaxy of the Milky Way.",
+   [340,-220,390],
+   52,
+   "irregular"],
+
+  ["Small Magellanic Cloud",
+   "Dwarf Irregular Galaxy",
+   "A dwarf irregular galaxy associated with the Milky Way.",
+   [430,-270,470],
+   38,
+   "irregular"],
+
+  ["Whirlpool Galaxy (M51)",
+   "Spiral Galaxy",
+   "An interacting spiral galaxy system.",
+   [-900,350,-650],
+   105,
+   "spiral"],
+
+  ["Sombrero Galaxy (M104)",
+   "Spiral Galaxy",
+   "A galaxy known for its bright bulge and prominent dust lane.",
+   [1000,-350,-850],
+   95,
+   "spiral"],
+
+  ["Pinwheel Galaxy (M101)",
+   "Spiral Galaxy",
+   "A large asymmetric spiral galaxy.",
+   [-1000,520,380],
+   125,
+   "spiral"],
+
+  ["Bode's Galaxy (M81)",
+   "Spiral Galaxy",
+   "A grand-design spiral galaxy in Ursa Major.",
+   [900,600,550],
+   90,
+   "spiral"],
+
+  ["Cigar Galaxy (M82)",
+   "Starburst Galaxy",
+   "An actively star-forming galaxy near M81.",
+   [850,670,600],
+   58,
+   "irregular"],
+
+  ["Black Eye Galaxy (M64)",
+   "Spiral Galaxy",
+   "A spiral galaxy with a prominent dark dust feature.",
+   [-1250,-420,-150],
+   78,
+   "spiral"],
+
+  ["Sunflower Galaxy (M63)",
+   "Spiral Galaxy",
+   "A flocculent spiral galaxy.",
+   [1250,260,-400],
+   84,
+   "spiral"],
+
+  ["Southern Pinwheel Galaxy (M83)",
+   "Barred Spiral Galaxy",
+   "A prominent barred spiral galaxy.",
+   [-720,-650,700],
+   94,
+   "barred"],
+
+  ["Centaurus A",
+   "Peculiar Galaxy",
+   "A nearby galaxy with a prominent dust lane.",
+   [680,-780,820],
+   82,
+   "irregular"],
+
+  ["Sculptor Galaxy (NGC 253)",
+   "Spiral Galaxy",
+   "A nearby star-forming spiral galaxy.",
+   [-1200,-600,850],
+   92,
+   "spiral"],
+
+  ["Messier 87",
+   "Giant Elliptical Galaxy",
+   "A giant elliptical galaxy associated with the Virgo Cluster.",
+   [1550,650,-900],
+   130,
+   "elliptical"],
+
+  ["Messier 49",
+   "Elliptical Galaxy",
+   "A giant elliptical galaxy in the Virgo Cluster.",
+   [1660,760,-980],
+   92,
+   "elliptical"],
+
+  ["Messier 60",
+   "Elliptical Galaxy",
+   "A giant elliptical galaxy in the Virgo Cluster region.",
+   [1730,700,-820],
+   80,
+   "elliptical"],
+
+  ["NGC 1300",
+   "Barred Spiral Galaxy",
+   "A well-studied barred spiral galaxy.",
+   [-1700,220,-760],
+   92,
+   "barred"],
+
+  ["NGC 1365",
+   "Barred Spiral Galaxy",
+   "A large barred spiral galaxy.",
+   [1850,-330,820],
+   112,
+   "barred"],
+
+  ["NGC 4038",
+   "Interacting Galaxy",
+   "One of the major galaxies in the Antennae system.",
+   [-1850,700,920],
+   65,
+   "irregular"],
+
+  ["NGC 4039",
+   "Interacting Galaxy",
+   "The second major galaxy in the Antennae system.",
+   [-1780,735,960],
+   62,
+   "irregular"],
+
+  ["NGC 6744",
+   "Spiral Galaxy",
+   "A large nearby spiral galaxy.",
+   [1800,920,160],
+   125,
+   "spiral"],
+
+  ["NGC 4258",
+   "Spiral Galaxy",
+   "A nearby spiral galaxy known for its warped disk.",
+   [-1600,-850,-430],
+   96,
+   "spiral"]
+
+];
+
+
+/* ============================================================
+   GALAXY CREATION
+============================================================ */
 
 const galaxyObjects = [];
 
@@ -1591,12 +924,23 @@ function createGalaxy(
   data
 ) {
 
+  const [
+    name,
+    type,
+    description,
+    position,
+    radius,
+    style
+  ] = data;
+
+
   const group =
     new THREE.Group();
 
   group.position.set(
-    ...data.position
+    ...position
   );
+
 
   group.rotation.z =
     random(
@@ -1604,53 +948,56 @@ function createGalaxy(
       Math.PI * 2
     );
 
+
   group.rotation.x =
-    data.tilt || 0;
+    random(
+      -.7,
+      .7
+    );
 
 
   /*
-    Main visual galaxy.
+    REUSED texture.
+    This is the major startup optimization.
   */
 
   const texture =
     createGalaxyTexture(
-      data
+      style
     );
-
-  const material =
-    new THREE.SpriteMaterial({
-
-      map:
-        texture,
-
-      transparent:
-        true,
-
-      opacity:
-        .95,
-
-      depthWrite:
-        false,
-
-      blending:
-        THREE.AdditiveBlending
-
-    });
 
 
   const sprite =
     new THREE.Sprite(
-      material
+
+      new THREE.SpriteMaterial({
+
+        map:
+          texture,
+
+        transparent:
+          true,
+
+        opacity:
+          .94,
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.AdditiveBlending
+
+      })
+
     );
 
-  const visualSize =
-    data.radius * 2.4;
 
   sprite.scale.set(
-    visualSize,
-    visualSize,
+    radius * 2.25,
+    radius * 2.25,
     1
   );
+
 
   group.add(
     sprite
@@ -1658,26 +1005,20 @@ function createGalaxy(
 
 
   /*
-    3D depth particles.
+    Small 3D star cloud.
+    Kept intentionally lightweight.
   */
 
   const count =
-    mobile ? 350 : 750;
+    isMobile
+      ? 45
+      : 90;
 
   const positions =
     new Float32Array(
       count * 3
     );
 
-  const colors =
-    new Float32Array(
-      count * 3
-    );
-
-  const c =
-    new THREE.Color(
-      data.color
-    );
 
   for (
     let i = 0;
@@ -1685,48 +1026,33 @@ function createGalaxy(
     i++
   ) {
 
-    const radius =
-      data.radius *
-      Math.pow(
-        Math.random(),
-        .55
+    const a =
+      random(
+        0,
+        Math.PI * 2
       );
 
-    const angle =
-      Math.random() *
-      Math.PI * 2;
-
-    const spread =
-      data.elliptical
-        ? .45
-        : .18;
+    const r =
+      radius *
+      Math.pow(
+        Math.random(),
+        .6
+      );
 
     positions[i * 3] =
-      Math.cos(angle) *
-      radius;
+      Math.cos(a) *
+      r;
 
     positions[i * 3 + 1] =
       random(
-        -data.radius * spread,
-        data.radius * spread
+        -radius * .08,
+        radius * .08
       );
 
     positions[i * 3 + 2] =
-      Math.sin(angle) *
-      radius;
+      Math.sin(a) *
+      r;
 
-
-    colors[i * 3] =
-      c.r *
-      random(.55, 1.1);
-
-    colors[i * 3 + 1] =
-      c.g *
-      random(.55, 1.1);
-
-    colors[i * 3 + 2] =
-      c.b *
-      random(.55, 1.1);
   }
 
 
@@ -1741,72 +1067,27 @@ function createGalaxy(
     )
   );
 
-  geometry.setAttribute(
-    "color",
-    new THREE.BufferAttribute(
-      colors,
-      3
-    )
-  );
-
-
-  const particleMaterial =
-    new THREE.PointsMaterial({
-
-      size:
-        mobile
-          ? 1.2
-          : 1.5,
-
-      vertexColors:
-        true,
-
-      transparent:
-        true,
-
-      opacity:
-        .65,
-
-      depthWrite:
-        false,
-
-      blending:
-        THREE.AdditiveBlending
-
-    });
-
 
   const particles =
     new THREE.Points(
+
       geometry,
-      particleMaterial
-    );
 
-  group.add(
-    particles
-  );
-
-
-  /*
-    Core glow.
-  */
-
-  const core =
-    new THREE.Sprite(
-
-      new THREE.SpriteMaterial({
-
-        map:
-          glowTexture,
+      new THREE.PointsMaterial({
 
         color:
-          data.color,
+          0xcbdcff,
+
+        size:
+          isMobile
+            ? 1
+            : 1.3,
 
         transparent:
           true,
 
         opacity:
-          .75,
+          .45,
 
         depthWrite:
           false,
@@ -1818,15 +1099,50 @@ function createGalaxy(
 
     );
 
-  const coreSize =
-    data.radius *
-    .75;
+
+  group.add(
+    particles
+  );
+
+
+  /*
+    Core.
+  */
+
+  const core =
+    new THREE.Sprite(
+
+      new THREE.SpriteMaterial({
+
+        map:
+          glowTexture,
+
+        color:
+          0xffd9aa,
+
+        transparent:
+          true,
+
+        opacity:
+          .7,
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.AdditiveBlending
+
+      })
+
+    );
+
 
   core.scale.set(
-    coreSize,
-    coreSize,
+    radius * .65,
+    radius * .65,
     1
   );
+
 
   group.add(
     core
@@ -1840,7 +1156,14 @@ function createGalaxy(
 
   const object = {
 
-    ...data,
+    name,
+
+    type,
+
+    description,
+
+    status:
+      "CATALOGUED",
 
     group,
 
@@ -1848,120 +1171,266 @@ function createGalaxy(
 
     particles,
 
-    core
+    radius
 
   };
+
 
   galaxyObjects.push(
     object
   );
 
+
   return object;
 }
 
 
-GALAXIES.forEach(
-  createGalaxy
+/* ============================================================
+   PROGRESSIVE GALAXY LOADING
+============================================================ */
+
+let galaxyIndex =
+  0;
+
+
+function loadGalaxiesProgressively() {
+
+  const start =
+    performance.now();
+
+
+  /*
+    Add only a few per frame.
+  */
+
+  while (
+    galaxyIndex <
+      GALAXIES.length &&
+
+    performance.now() -
+      start <
+      7
+  ) {
+
+    createGalaxy(
+      GALAXIES[
+        galaxyIndex
+      ]
+    );
+
+    galaxyIndex++;
+
+  }
+
+
+  if (
+    galaxyIndex <
+      GALAXIES.length
+  ) {
+
+    requestAnimationFrame(
+      loadGalaxiesProgressively
+    );
+
+  } else {
+
+    loadDeepField();
+
+  }
+}
+
+
+/*
+  Start galaxy loading AFTER
+  the first render has happened.
+*/
+
+requestAnimationFrame(
+  () => {
+
+    requestAnimationFrame(
+      loadGalaxiesProgressively
+    );
+
+  }
 );
 
 
-/* =========================================================
-   DEEP FIELD GALAXIES
-========================================================= */
+/* ============================================================
+   DEEP FIELD
+============================================================ */
 
-function createDeepField() {
+let deepFieldStarted =
+  false;
 
-  const group =
-    new THREE.Group();
+let deepCount =
+  0;
 
-  const count =
-    mobile ? 120 : 260;
+const deepGroup =
+  new THREE.Group();
 
-  for (
-    let i = 0;
-    i < count;
-    i++
-  ) {
+scene.add(
+  deepGroup
+);
 
-    const direction =
-      new THREE.Vector3(
-        random(-1, 1),
-        random(-1, 1),
-        random(-1, 1)
-      ).normalize();
 
-    const distance =
-      random(
-        3000,
-        11000
-      );
+function createDeepGalaxy() {
 
-    const position =
-      direction.multiplyScalar(
-        distance
-      );
+  const direction =
+    new THREE.Vector3(
+      random(-1,1),
+      random(-1,1),
+      random(-1,1)
+    ).normalize();
 
-    const data = {
 
-      name:
-        `Deep Field ${String(i + 1).padStart(3, "0")}`,
-
-      type:
-        Math.random() < .7
-          ? "Distant Spiral Galaxy"
-          : "Distant Elliptical Galaxy",
-
-      status:
-        "ILLUSTRATIVE DEEP FIELD",
-
-      description:
-        "A procedural distant-galaxy representation used to create a dense deep-space environment. It is not presented as an individually identified catalogue object.",
-
-      position:
-        position.toArray(),
-
-      radius:
-        random(12, 38),
-
-      arms:
-        Math.floor(
-          random(2, 5)
-        ),
-
-      color:
-        Math.random() < .75
-          ? 0x9fbfff
-          : 0xd6a9ff,
-
-      elliptical:
-        Math.random() > .78,
-
-      procedural:
-        true
-
-    };
-
-    const galaxy =
-      createGalaxy(
-        data
-      );
-
-    galaxy.group.scale.setScalar(
-      random(.5, 1.4)
+  const distance =
+    random(
+      4500,
+      18000
     );
-  }
 
-  scene.add(
-    group
+
+  const position =
+    direction.multiplyScalar(
+      distance
+    );
+
+
+  const size =
+    random(
+      12,
+      42
+    );
+
+
+  const styles = [
+    "spiral",
+    "barred",
+    "elliptical",
+    "irregular"
+  ];
+
+
+  const style =
+    styles[
+      Math.floor(
+        Math.random() *
+        styles.length
+      )
+    ];
+
+
+  const sprite =
+    new THREE.Sprite(
+
+      new THREE.SpriteMaterial({
+
+        map:
+          createGalaxyTexture(
+            style
+          ),
+
+        transparent:
+          true,
+
+        opacity:
+          random(
+            .35,
+            .7
+          ),
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.AdditiveBlending
+
+      })
+
+    );
+
+
+  sprite.position.copy(
+    position
+  );
+
+
+  sprite.scale.set(
+    size * 2,
+    size * 2,
+    1
+  );
+
+
+  deepGroup.add(
+    sprite
   );
 }
 
-createDeepField();
+
+function loadDeepField() {
+
+  if (
+    deepFieldStarted
+  ) {
+    return;
+  }
+
+  deepFieldStarted =
+    true;
 
 
-/* =========================================================
+  const target =
+    isMobile
+      ? 100
+      : 220;
+
+
+  function batch() {
+
+    const end =
+      Math.min(
+        deepCount + 10,
+        target
+      );
+
+
+    while (
+      deepCount <
+      end
+    ) {
+
+      createDeepGalaxy();
+
+      deepCount++;
+
+    }
+
+
+    if (
+      deepCount <
+      target
+    ) {
+
+      requestAnimationFrame(
+        batch
+      );
+
+    }
+
+  }
+
+
+  requestAnimationFrame(
+    batch
+  );
+}
+
+
+/* ============================================================
    SOLAR SYSTEM
-========================================================= */
+============================================================ */
 
 const solarSystem =
   new THREE.Group();
@@ -1971,25 +1440,26 @@ scene.add(
 );
 
 
-/* =========================================================
+/* ============================================================
    SUN
-========================================================= */
+============================================================ */
 
 const sun =
   new THREE.Mesh(
 
     new THREE.SphereGeometry(
       10,
-      64,
-      64
+      32,
+      32
     ),
 
     new THREE.MeshBasicMaterial({
       color:
-        0xffd36a
+        0xffd267
     })
 
   );
+
 
 solarSystem.add(
   sun
@@ -2005,13 +1475,13 @@ const sunGlow =
         glowTexture,
 
       color:
-        0xffb52e,
+        0xffa927,
 
       transparent:
         true,
 
       opacity:
-        .9,
+        .85,
 
       depthWrite:
         false,
@@ -2023,37 +1493,39 @@ const sunGlow =
 
   );
 
+
 sunGlow.scale.set(
   70,
   70,
   1
 );
 
+
 solarSystem.add(
   sunGlow
 );
 
 
-/* =========================================================
+/* ============================================================
    PLANETS
-========================================================= */
+============================================================ */
 
 const PLANETS = [
 
   {
     name: "Mercury",
-    radius: 1.2,
+    radius: 1.3,
     distance: 18,
     period: 87.969,
-    color: 0x9d9288
+    color: 0x9c9288
   },
 
   {
     name: "Venus",
-    radius: 1.9,
+    radius: 2,
     distance: 27,
     period: 224.701,
-    color: 0xd7b477
+    color: 0xd6b477
   },
 
   {
@@ -2061,23 +1533,23 @@ const PLANETS = [
     radius: 2.2,
     distance: 38,
     period: 365.256,
-    color: 0x3e83cf
+    color: 0x3980ce
   },
 
   {
     name: "Mars",
-    radius: 1.65,
+    radius: 1.7,
     distance: 50,
     period: 686.98,
-    color: 0xb75d45
+    color: 0xb75e45
   },
 
   {
     name: "Jupiter",
-    radius: 6.4,
+    radius: 6.5,
     distance: 78,
     period: 4332.59,
-    color: 0xd1aa80
+    color: 0xd0aa80
   },
 
   {
@@ -2094,7 +1566,7 @@ const PLANETS = [
     radius: 4,
     distance: 137,
     period: 30688.5,
-    color: 0x8bd1d7
+    color: 0x8acfd5
   },
 
   {
@@ -2102,7 +1574,7 @@ const PLANETS = [
     radius: 3.9,
     distance: 166,
     period: 60182,
-    color: 0x416bc7
+    color: 0x416ac6
   }
 
 ];
@@ -2111,223 +1583,9 @@ const PLANETS = [
 const planetObjects = [];
 
 
-/* =========================================================
-   PLANET TEXTURE
-========================================================= */
-
-function createPlanetTexture(
-  planet
-) {
-
-  const size =
-    512;
-
-  const canvas =
-    document.createElement(
-      "canvas"
-    );
-
-  canvas.width =
-    size;
-
-  canvas.height =
-    size;
-
-  const ctx =
-    canvas.getContext(
-      "2d"
-    );
-
-  const base =
-    new THREE.Color(
-      planet.color
-    );
-
-
-  /*
-    Base.
-  */
-
-  ctx.fillStyle =
-    `rgb(
-      ${base.r * 255},
-      ${base.g * 255},
-      ${base.b * 255}
-    )`;
-
-  ctx.fillRect(
-    0,
-    0,
-    size,
-    size
-  );
-
-
-  /*
-    Planet-specific bands/features.
-  */
-
-  if (
-    planet.name === "Jupiter" ||
-    planet.name === "Saturn"
-  ) {
-
-    for (
-      let y = 0;
-      y < size;
-      y += 18
-    ) {
-
-      const variation =
-        Math.random() *
-        45;
-
-      ctx.fillStyle =
-        `rgba(
-          255,
-          255,
-          255,
-          ${.08 + variation / 400}
-        )`;
-
-      ctx.fillRect(
-        0,
-        y,
-        size,
-        random(
-          5,
-          20
-        )
-      );
-    }
-
-  } else if (
-    planet.name === "Earth"
-  ) {
-
-    /*
-      Ocean.
-    */
-
-    ctx.fillStyle =
-      "#174f91";
-
-    ctx.fillRect(
-      0,
-      0,
-      size,
-      size
-    );
-
-
-    /*
-      Procedural continents.
-    */
-
-    for (
-      let i = 0;
-      i < 45;
-      i++
-    ) {
-
-      const x =
-        random(
-          0,
-          size
-        );
-
-      const y =
-        random(
-          0,
-          size
-        );
-
-      const w =
-        random(
-          15,
-          90
-        );
-
-      const h =
-        random(
-          10,
-          55
-        );
-
-      ctx.fillStyle =
-        `rgba(
-          ${random(30,90)},
-          ${random(100,180)},
-          ${random(50,100)},
-          .8
-        )`;
-
-      ctx.beginPath();
-
-      ctx.ellipse(
-        x,
-        y,
-        w,
-        h,
-        random(
-          0,
-          Math.PI
-        ),
-        0,
-        Math.PI * 2
-      );
-
-      ctx.fill();
-    }
-
-  } else if (
-    planet.name === "Mars"
-  ) {
-
-    for (
-      let i = 0;
-      i < 80;
-      i++
-    ) {
-
-      ctx.fillStyle =
-        `rgba(
-          80,
-          30,
-          20,
-          ${random(.05,.25)}
-        )`;
-
-      ctx.beginPath();
-
-      ctx.arc(
-        random(0,size),
-        random(0,size),
-        random(3,25),
-        0,
-        Math.PI * 2
-      );
-
-      ctx.fill();
-    }
-  }
-
-
-  const texture =
-    new THREE.CanvasTexture(
-      canvas
-    );
-
-  texture.colorSpace =
-    THREE.SRGBColorSpace;
-
-  return texture;
-}
-
-
-/* =========================================================
-   ORBITS
-========================================================= */
+/* ============================================================
+   ORBIT
+============================================================ */
 
 function createOrbit(
   radius
@@ -2337,18 +1595,20 @@ function createOrbit(
 
   for (
     let i = 0;
-    i <= 160;
+    i <= 96;
     i++
   ) {
 
     const angle =
       i /
-      160 *
+      96 *
       Math.PI *
       2;
 
     points.push(
+
       new THREE.Vector3(
+
         Math.cos(angle) *
           radius,
 
@@ -2356,8 +1616,11 @@ function createOrbit(
 
         Math.sin(angle) *
           radius
+
       )
+
     );
+
   }
 
 
@@ -2372,13 +1635,13 @@ function createOrbit(
     new THREE.LineBasicMaterial({
 
       color:
-        0x62708b,
+        0x58677f,
 
       transparent:
         true,
 
       opacity:
-        .24
+        .2
 
     });
 
@@ -2390,9 +1653,9 @@ function createOrbit(
 }
 
 
-/* =========================================================
-   PLANET CREATION
-========================================================= */
+/* ============================================================
+   CREATE PLANETS
+============================================================ */
 
 PLANETS.forEach(
   (
@@ -2412,19 +1675,17 @@ PLANETS.forEach(
 
         new THREE.SphereGeometry(
           planet.radius,
-          40,
-          40
+          24,
+          24
         ),
 
         new THREE.MeshStandardMaterial({
 
-          map:
-            createPlanetTexture(
-              planet
-            ),
+          color:
+            planet.color,
 
           roughness:
-            .82,
+            .85,
 
           metalness:
             .02
@@ -2439,10 +1700,6 @@ PLANETS.forEach(
     );
 
 
-    /*
-      Saturn rings.
-    */
-
     if (
       planet.rings
     ) {
@@ -2453,19 +1710,19 @@ PLANETS.forEach(
           new THREE.RingGeometry(
             planet.radius * 1.3,
             planet.radius * 2.15,
-            96
+            64
           ),
 
           new THREE.MeshBasicMaterial({
 
             color:
-              0xc9b486,
+              0xc5b17f,
 
             transparent:
               true,
 
             opacity:
-              .68,
+              .65,
 
             side:
               THREE.DoubleSide
@@ -2474,18 +1731,17 @@ PLANETS.forEach(
 
         );
 
+
       ring.rotation.x =
         Math.PI / 2;
+
 
       mesh.add(
         ring
       );
+
     }
 
-
-    /*
-      Atmosphere.
-    */
 
     if (
       planet.name ===
@@ -2497,14 +1753,14 @@ PLANETS.forEach(
 
           new THREE.SphereGeometry(
             planet.radius * 1.08,
-            32,
-            32
+            20,
+            20
           ),
 
           new THREE.MeshBasicMaterial({
 
             color:
-              0x4ea4ff,
+              0x4da4ff,
 
             transparent:
               true,
@@ -2522,9 +1778,11 @@ PLANETS.forEach(
 
         );
 
+
       mesh.add(
         atmosphere
       );
+
     }
 
 
@@ -2542,21 +1800,23 @@ PLANETS.forEach(
 );
 
 
-/* =========================================================
-   ASTEROID BELT
-========================================================= */
+/* ============================================================
+   ASTEROIDS
+============================================================ */
 
 function createAsteroids() {
 
   const count =
-    mobile
-      ? 1800
-      : 4200;
+    isMobile
+      ? 1000
+      : 2400;
+
 
   const positions =
     new Float32Array(
       count * 3
     );
+
 
   for (
     let i = 0;
@@ -2570,30 +1830,31 @@ function createAsteroids() {
         Math.PI * 2
       );
 
+
     const radius =
       random(
         59,
         70
       );
 
+
     positions[i * 3] =
       Math.cos(angle) *
       radius;
 
     positions[i * 3 + 1] =
-      random(
-        -2,
-        2
-      );
+      random(-2,2);
 
     positions[i * 3 + 2] =
       Math.sin(angle) *
       radius;
+
   }
 
 
   const geometry =
     new THREE.BufferGeometry();
+
 
   geometry.setAttribute(
     "position",
@@ -2608,16 +1869,16 @@ function createAsteroids() {
     new THREE.PointsMaterial({
 
       color:
-        0xa79785,
+        0xa29380,
 
       size:
-        .32,
+        .3,
 
       transparent:
         true,
 
       opacity:
-        .55,
+        .5,
 
       depthWrite:
         false
@@ -2625,27 +1886,28 @@ function createAsteroids() {
     });
 
 
-  const points =
+  solarSystem.add(
+
     new THREE.Points(
       geometry,
       material
-    );
+    )
 
-  solarSystem.add(
-    points
   );
+
 }
+
 
 createAsteroids();
 
 
-/* =========================================================
-   LIGHTING
-========================================================= */
+/* ============================================================
+   LIGHT
+============================================================ */
 
 scene.add(
   new THREE.AmbientLight(
-    0x7788a0,
+    0x7b8da5,
     .18
   )
 );
@@ -2654,18 +1916,19 @@ scene.add(
 const sunLight =
   new THREE.PointLight(
     0xffffff,
-    3.2,
+    3,
     700
   );
+
 
 solarSystem.add(
   sunLight
 );
 
 
-/* =========================================================
-   TIME
-========================================================= */
+/* ============================================================
+   TIME ENGINE
+============================================================ */
 
 const J2000 =
   Date.UTC(
@@ -2675,8 +1938,10 @@ const J2000 =
     12
   );
 
+
 let selectedDate =
   new Date();
+
 
 let presentMode =
   true;
@@ -2689,14 +1954,11 @@ function daysFromJ2000(
   return (
     date.getTime() -
     J2000
-  ) / 86400000;
+  ) /
+  86400000;
 
 }
 
-
-/* =========================================================
-   PLANET POSITION
-========================================================= */
 
 function updatePlanets() {
 
@@ -2710,10 +1972,8 @@ function updatePlanets() {
     planet => {
 
       const angle =
-        (
-          days /
-          planet.period
-        ) *
+        days /
+        planet.period *
         Math.PI *
         2
         +
@@ -2725,6 +1985,7 @@ function updatePlanets() {
         Math.cos(angle) *
         planet.distance;
 
+
       planet.mesh.position.z =
         Math.sin(angle) *
         planet.distance;
@@ -2734,11 +1995,11 @@ function updatePlanets() {
 }
 
 
-/* =========================================================
+/* ============================================================
    SCALE
-========================================================= */
+============================================================ */
 
-const scaleSlider =
+const slider =
   document.getElementById(
     "scaleSlider"
   );
@@ -2765,7 +2026,7 @@ const SCALE_NAMES = [
 
   "EARTH",
 
-  "GEOGRAPHY",
+  "CONTINENT",
 
   "CITY",
 
@@ -2774,9 +2035,17 @@ const SCALE_NAMES = [
 ];
 
 
-function getScaleName(
-  value
-) {
+let scaleTarget =
+  4200;
+
+
+function updateScale() {
+
+  const value =
+    Number(
+      slider.value
+    );
+
 
   const index =
     Math.round(
@@ -2785,67 +2054,54 @@ function getScaleName(
       (SCALE_NAMES.length - 1)
     );
 
-  return SCALE_NAMES[
-    clamp(
-      index,
-      0,
-      SCALE_NAMES.length - 1
-    )
-  ];
-}
-
-
-let scaleTarget =
-  3200;
-
-
-function updateScale() {
-
-  const value =
-    Number(
-      scaleSlider.value
-    );
-
 
   scaleText.textContent =
-    getScaleName(
-      value
-    );
+    SCALE_NAMES[
+      clamp(
+        index,
+        0,
+        SCALE_NAMES.length - 1
+      )
+    ];
 
-
-  /*
-    Exponential distance mapping.
-  */
 
   const far =
-    12000;
+    18000;
 
   const near =
     .8;
 
+
   const t =
-    value / 100;
+    value /
+    100;
 
 
   scaleTarget =
     Math.exp(
+
       Math.log(far) *
-        (1 - t) +
+        (1 - t)
+
+      +
+
       Math.log(near) *
         t
+
     );
+
 }
 
 
-scaleSlider.addEventListener(
+slider.addEventListener(
   "input",
   updateScale
 );
 
 
-/* =========================================================
+/* ============================================================
    SEARCH
-========================================================= */
+============================================================ */
 
 const searchPanel =
   document.getElementById(
@@ -2884,7 +2140,7 @@ document
         setTimeout(
           () =>
             searchInput.focus(),
-          100
+          80
         );
 
       }
@@ -2893,12 +2149,13 @@ document
   );
 
 
-function search() {
+function performSearch() {
 
   const query =
     searchInput.value
       .trim()
       .toLowerCase();
+
 
   searchResults.innerHTML =
     "";
@@ -2909,7 +2166,7 @@ function search() {
   }
 
 
-  const matches =
+  const results =
     galaxyObjects.filter(
       object =>
 
@@ -2926,7 +2183,9 @@ function search() {
     );
 
 
-  if (!matches.length) {
+  if (
+    !results.length
+  ) {
 
     searchResults.innerHTML =
       `
@@ -2947,8 +2206,8 @@ function search() {
   }
 
 
-  matches
-    .slice(0, 15)
+  results
+    .slice(0,15)
     .forEach(
       object => {
 
@@ -2957,8 +2216,10 @@ function search() {
             "div"
           );
 
+
         row.className =
           "search-result";
+
 
         row.innerHTML =
           `
@@ -2972,8 +2233,7 @@ function search() {
           `;
 
 
-        row.addEventListener(
-          "click",
+        row.onclick =
           () => {
 
             showObject(
@@ -2984,8 +2244,7 @@ function search() {
               "hidden"
             );
 
-          }
-        );
+          };
 
 
         searchResults.appendChild(
@@ -3003,7 +2262,7 @@ document
   )
   .addEventListener(
     "click",
-    search
+    performSearch
   );
 
 
@@ -3015,40 +2274,22 @@ searchInput.addEventListener(
       event.key ===
       "Enter"
     ) {
-      search();
+
+      performSearch();
+
     }
 
   }
 );
 
 
-/* =========================================================
+/* ============================================================
    OBJECT PANEL
-========================================================= */
+============================================================ */
 
 const objectPanel =
   document.getElementById(
     "objectPanel"
-  );
-
-const objectName =
-  document.getElementById(
-    "objectName"
-  );
-
-const objectDescription =
-  document.getElementById(
-    "objectDescription"
-  );
-
-const objectType =
-  document.getElementById(
-    "objectType"
-  );
-
-const objectStatus =
-  document.getElementById(
-    "objectStatus"
   );
 
 
@@ -3056,17 +2297,37 @@ function showObject(
   object
 ) {
 
-  objectName.textContent =
-    object.name;
+  document
+    .getElementById(
+      "objectName"
+    )
+    .textContent =
+      object.name;
 
-  objectDescription.textContent =
-    object.description;
 
-  objectType.textContent =
-    object.type;
+  document
+    .getElementById(
+      "objectDescription"
+    )
+    .textContent =
+      object.description;
 
-  objectStatus.textContent =
-    object.status;
+
+  document
+    .getElementById(
+      "objectType"
+    )
+    .textContent =
+      object.type;
+
+
+  document
+    .getElementById(
+      "objectStatus"
+    )
+    .textContent =
+      object.status;
+
 
   objectPanel.classList.remove(
     "hidden"
@@ -3086,6 +2347,7 @@ function focusObject(
   const position =
     new THREE.Vector3();
 
+
   object.getWorldPosition(
     position
   );
@@ -3103,21 +2365,16 @@ function focusObject(
       .normalize();
 
 
-  const distance =
-    Math.max(
-      object.userData.radius ||
-        100,
-      250
-    );
-
-
   camera.position.copy(
-    position.clone()
-      .add(
-        direction.multiplyScalar(
-          distance
-        )
+
+    position.clone().add(
+
+      direction.multiplyScalar(
+        300
       )
+
+    )
+
   );
 
 }
@@ -3139,29 +2396,33 @@ document
   );
 
 
-/* =========================================================
-   CLICK GALAXIES
-========================================================= */
+/* ============================================================
+   GALAXY CLICK
+============================================================ */
 
 const raycaster =
   new THREE.Raycaster();
+
 
 const pointer =
   new THREE.Vector2();
 
 
-let pointerDownX = 0;
-let pointerDownY = 0;
+let pointerX =
+  0;
+
+let pointerY =
+  0;
 
 
 renderer.domElement.addEventListener(
   "pointerdown",
   event => {
 
-    pointerDownX =
+    pointerX =
       event.clientX;
 
-    pointerDownY =
+    pointerY =
       event.clientY;
 
   }
@@ -3175,16 +2436,12 @@ renderer.domElement.addEventListener(
     const movement =
       Math.hypot(
         event.clientX -
-          pointerDownX,
+          pointerX,
 
         event.clientY -
-          pointerDownY
+          pointerY
       );
 
-
-    /*
-      Ignore clicks that were actually drags.
-    */
 
     if (
       movement > 8
@@ -3226,22 +2483,17 @@ renderer.domElement.addEventListener(
     );
 
 
-    const objects =
-      galaxyObjects.map(
-        g =>
-          g.sprite
-      );
-
-
-    const hits =
+    const hit =
       raycaster.intersectObjects(
-        objects,
+        galaxyObjects.map(
+          g => g.sprite
+        ),
         false
       );
 
 
     if (
-      !hits.length
+      !hit.length
     ) {
       return;
     }
@@ -3251,7 +2503,7 @@ renderer.domElement.addEventListener(
       galaxyObjects.find(
         g =>
           g.sprite ===
-          hits[0].object
+          hit[0].object
       );
 
 
@@ -3269,35 +2521,9 @@ renderer.domElement.addEventListener(
 );
 
 
-/* =========================================================
-   PRESENT
-========================================================= */
-
-document
-  .getElementById(
-    "presentBtn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      presentMode =
-        true;
-
-      selectedDate =
-        new Date();
-
-      updateDateUI();
-
-      updatePlanets();
-
-    }
-  );
-
-
-/* =========================================================
-   DATE UI
-========================================================= */
+/* ============================================================
+   DATE
+============================================================ */
 
 const timeDisplay =
   document.getElementById(
@@ -3338,6 +2564,7 @@ function formatDate(
 
     }
   );
+
 }
 
 
@@ -3346,8 +2573,8 @@ function inputDate(
 ) {
 
   const pad =
-    value =>
-      String(value)
+    n =>
+      String(n)
         .padStart(
           2,
           "0"
@@ -3369,6 +2596,7 @@ function inputDate(
       date.getMinutes()
     )}`
   );
+
 }
 
 
@@ -3378,6 +2606,7 @@ function updateDateUI() {
     formatDate(
       selectedDate
     );
+
 
   dateInput.value =
     inputDate(
@@ -3397,13 +2626,16 @@ dateInput.addEventListener(
       return;
     }
 
+
     selectedDate =
       new Date(
         dateInput.value
       );
 
+
     presentMode =
       false;
+
 
     updateDateUI();
 
@@ -3413,19 +2645,25 @@ dateInput.addEventListener(
 );
 
 
+/* ============================================================
+   DAY BUTTONS
+============================================================ */
+
 function changeDay(
-  amount
+  days
 ) {
 
   selectedDate =
     new Date(
       selectedDate.getTime() +
-      amount *
+      days *
       86400000
     );
 
+
   presentMode =
     false;
+
 
   updateDateUI();
 
@@ -3438,153 +2676,73 @@ document
   .getElementById(
     "previousDay"
   )
-  .addEventListener(
-    "click",
+  .onclick =
     () =>
-      changeDay(-1)
-  );
+      changeDay(-1);
 
 
 document
   .getElementById(
     "nextDay"
   )
-  .addEventListener(
-    "click",
+  .onclick =
     () =>
-      changeDay(1)
-  );
+      changeDay(1);
 
 
-/* =========================================================
-   MOBILE PINCH
-========================================================= */
+/* ============================================================
+   PRESENT
+============================================================ */
 
-let pinchDistance =
-  null;
+document
+  .getElementById(
+    "presentBtn"
+  )
+  .onclick =
+    () => {
 
+      presentMode =
+        true;
 
-renderer.domElement.addEventListener(
-  "touchstart",
-  event => {
+      selectedDate =
+        new Date();
 
-    if (
-      event.touches.length ===
-      2
-    ) {
+      updateDateUI();
 
-      const a =
-        event.touches[0];
+      updatePlanets();
 
-      const b =
-        event.touches[1];
-
-
-      pinchDistance =
-        Math.hypot(
-          a.clientX -
-            b.clientX,
-
-          a.clientY -
-            b.clientY
-        );
-
-    }
-
-  },
-  {
-    passive: true
-  }
-);
+    };
 
 
-renderer.domElement.addEventListener(
-  "touchmove",
-  event => {
+/* ============================================================
+   CAMERA SCALE
+============================================================ */
 
-    if (
-      event.touches.length !==
-      2
-    ) {
-      return;
-    }
+function updateCameraScale() {
 
-
-    if (
-      pinchDistance ===
-      null
-    ) {
-      return;
-    }
-
-
-    const a =
-      event.touches[0];
-
-    const b =
-      event.touches[1];
-
-
-    const current =
-      Math.hypot(
-        a.clientX -
-          b.clientX,
-
-        a.clientY -
-          b.clientY
-      );
-
-
-    const delta =
-      current -
-      pinchDistance;
-
-
-    const direction =
-      camera.position
-        .clone()
-        .sub(
-          controls.target
-        )
-        .normalize();
-
-
-    camera.position.add(
-      direction.multiplyScalar(
-        -delta * .025
-      )
+  const current =
+    camera.position.distanceTo(
+      controls.target
     );
 
 
-    pinchDistance =
-      current;
+  const next =
+    THREE.MathUtils.lerp(
+      current,
+      scaleTarget,
+      .06
+    );
 
-  },
-  {
-    passive: true
+
+  if (
+    Math.abs(
+      next - current
+    ) <
+    .01
+  ) {
+    return;
   }
-);
 
-
-renderer.domElement.addEventListener(
-  "touchend",
-  () => {
-
-    pinchDistance =
-      null;
-
-  },
-  {
-    passive: true
-  }
-);
-
-
-/* =========================================================
-   SMOOTH SCALE
-========================================================= */
-
-function updateCameraScale() {
 
   const direction =
     camera.position
@@ -3595,50 +2753,26 @@ function updateCameraScale() {
       .normalize();
 
 
-  const currentDistance =
-    camera.position.distanceTo(
-      controls.target
-    );
+  camera.position.copy(
 
+    controls.target
+      .clone()
+      .add(
 
-  const next =
-    THREE.MathUtils.lerp(
-      currentDistance,
-      scaleTarget,
-      .055
-    );
-
-
-  /*
-    Only use slider movement when
-    it differs significantly.
-  */
-
-  if (
-    Math.abs(
-      next -
-      currentDistance
-    ) > .001
-  ) {
-
-    camera.position.copy(
-      controls.target
-        .clone()
-        .add(
-          direction.multiplyScalar(
-            next
-          )
+        direction.multiplyScalar(
+          next
         )
-    );
 
-  }
+      )
+
+  );
 
 }
 
 
-/* =========================================================
+/* ============================================================
    RESIZE
-========================================================= */
+============================================================ */
 
 window.addEventListener(
   "resize",
@@ -3648,6 +2782,7 @@ window.addEventListener(
       window.innerWidth /
       window.innerHeight;
 
+
     camera.updateProjectionMatrix();
 
 
@@ -3656,21 +2791,15 @@ window.addEventListener(
       window.innerHeight
     );
 
-
-    composer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    );
-
   }
 );
 
 
-/* =========================================================
+/* ============================================================
    ANIMATION
-========================================================= */
+============================================================ */
 
-let lastPresent =
+let lastPresentUpdate =
   0;
 
 
@@ -3684,13 +2813,14 @@ function animate(
 
 
   /*
-    Present mode.
+    Present mode updates the
+    astronomical clock.
   */
 
   if (
     presentMode &&
     time -
-      lastPresent >
+      lastPresentUpdate >
       500
   ) {
 
@@ -3701,62 +2831,57 @@ function animate(
 
     updatePlanets();
 
-    lastPresent =
+    lastPresentUpdate =
       time;
 
   }
 
 
   /*
-    Very subtle visual movement.
-
-    This is presentation only;
-    it does not claim to represent
-    real-time galactic rotation.
-  */
-
-  galaxyObjects.forEach(
-    galaxy => {
-
-      if (
-        galaxy.procedural
-      ) {
-
-        galaxy.group.rotation.y +=
-          .0000008;
-
-      }
-
-    }
-  );
-
-
-  solarSystem.rotation.y +=
-    .000012;
-
-
-  /*
-    Deep-field parallax.
+    Very slow presentation movement.
   */
 
   stars.rotation.y +=
-    .000002;
+    .0000015;
+
+
+  solarSystem.rotation.y +=
+    .00001;
+
+
+  /*
+    Galaxy movement is intentionally
+    extremely slow. It is visual
+    presentation, not real-time
+    galactic motion.
+  */
+
+  for (
+    const galaxy of
+    galaxyObjects
+  ) {
+
+    galaxy.group.rotation.y +=
+      .0000004;
+
+  }
 
 
   updateCameraScale();
 
-
   controls.update();
 
-
-  composer.render();
+  renderer.render(
+    scene,
+    camera
+  );
 
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+/* ============================================================
+   INITIALIZE
+============================================================ */
 
 selectedDate =
   new Date();
@@ -3765,37 +2890,38 @@ updateDateUI();
 
 updatePlanets();
 
-scaleSlider.value =
+slider.value =
   0;
 
 updateScale();
 
 
 /*
-  Let the renderer initialize,
-  then remove loading screen.
+  CRITICAL DIFFERENCE:
+
+  Start rendering immediately.
+*/
+
+animate(0);
+
+
+/*
+  Hide loading screen after
+  the FIRST rendered frame.
+
+  It does not wait for galaxies.
 */
 
 requestAnimationFrame(
   () => {
 
-    setTimeout(
-      () => {
-
-        document
-          .getElementById(
-            "loading"
-          )
-          .classList.add(
-            "hide"
-          );
-
-      },
-      700
-    );
+    document
+      .getElementById(
+        "loading"
+      )
+      .classList.add(
+        "hide"
+      );
 
   }
 );
-
-
-animate(0);
