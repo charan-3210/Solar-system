@@ -1,0 +1,439 @@
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    color:white;
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+body{
+    touch-action:none;
+}
+
+#app{
+    position:fixed;
+    inset:0;
+}
+
+canvas{
+    display:block;
+    width:100%;
+    height:100%;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+    color:white;
+    background:rgba(10,15,25,.7);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:10px;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+/* loading */
+
+#loading{
+    position:fixed;
+    inset:0;
+    z-index:100;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    background:
+        radial-gradient(
+            circle,
+            #101d3a 0%,
+            #02040a 45%,
+            #000 100%
+        );
+
+    transition:.7s;
+}
+
+#loading.hide{
+    opacity:0;
+    pointer-events:none;
+}
+
+.loading-ring{
+    width:55px;
+    height:55px;
+
+    border-radius:50%;
+
+    border:2px solid rgba(255,255,255,.12);
+    border-top-color:white;
+
+    animation:spin 1s linear infinite;
+
+    margin-bottom:18px;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+#loading strong{
+    letter-spacing:.25em;
+}
+
+#loading small{
+    margin-top:6px;
+    color:#8290a9;
+}
+
+
+/* header */
+
+header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+
+    z-index:20;
+
+    padding:
+        max(15px,env(safe-area-inset-top))
+        18px
+        0;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    pointer-events:none;
+}
+
+.logo{
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:.25em;
+}
+
+.subtitle{
+    font-size:8px;
+    letter-spacing:.2em;
+    color:#77859d;
+    margin-top:3px;
+}
+
+.actions{
+    display:flex;
+    gap:7px;
+    pointer-events:auto;
+}
+
+.actions button{
+    padding:10px 13px;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.08em;
+}
+
+
+/* panels */
+
+.panel{
+    position:fixed;
+    z-index:40;
+
+    background:rgba(4,7,14,.78);
+
+    border:1px solid rgba(255,255,255,.13);
+
+    backdrop-filter:blur(20px);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.5);
+
+    border-radius:18px;
+}
+
+.hidden{
+    display:none;
+}
+
+
+/* search */
+
+#searchPanel{
+    right:18px;
+    top:80px;
+    width:min(390px,calc(100vw - 36px));
+    padding:15px;
+}
+
+.panelTitle{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.1em;
+
+    margin-bottom:11px;
+}
+
+.panelTitle button,
+.close{
+    border:0;
+    background:none;
+    font-size:22px;
+}
+
+#searchInput{
+    width:100%;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    outline:none;
+
+    color:white;
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid rgba(255,255,255,.12);
+}
+
+.result{
+    margin-top:6px;
+    padding:11px;
+
+    border-radius:9px;
+
+    background:rgba(255,255,255,.04);
+
+    cursor:pointer;
+}
+
+.result:hover{
+    background:rgba(255,255,255,.1);
+}
+
+.result b{
+    font-size:12px;
+}
+
+.result small{
+    display:block;
+    margin-top:3px;
+    color:#7d8aa1;
+}
+
+
+/* object */
+
+#objectPanel{
+    left:18px;
+    top:95px;
+    width:min(350px,calc(100vw - 36px));
+    padding:20px;
+}
+
+#objectPanel .close{
+    position:absolute;
+    top:8px;
+    right:11px;
+}
+
+#objectType{
+    color:#71819b;
+    letter-spacing:.15em;
+    font-size:8px;
+}
+
+#objectName{
+    margin:8px 0 4px;
+    font-size:25px;
+}
+
+#objectDescription{
+    color:#aeb8ca;
+    font-size:12px;
+    line-height:1.5;
+}
+
+.objectGrid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    margin-top:17px;
+}
+
+.objectGrid div{
+    padding:9px;
+    background:rgba(255,255,255,.05);
+    border-radius:9px;
+}
+
+.objectGrid span{
+    display:block;
+    font-size:7px;
+    color:#687791;
+}
+
+.objectGrid b{
+    display:block;
+    margin-top:4px;
+    font-size:9px;
+}
+
+
+/* bottom */
+
+.bottom{
+    position:fixed;
+    z-index:20;
+
+    left:14px;
+    right:14px;
+    bottom:max(14px,env(safe-area-inset-bottom));
+
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+
+    gap:10px;
+
+    pointer-events:none;
+}
+
+.timeBox,
+.scaleBox{
+    pointer-events:auto;
+
+    background:rgba(4,7,13,.74);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.12);
+
+    border-radius:17px;
+
+    padding:12px;
+}
+
+.timeBox{
+    width:270px;
+}
+
+.scaleBox{
+    width:min(450px,52vw);
+}
+
+.timeBox small,
+.scaleBox small{
+    display:block;
+
+    color:#74829a;
+
+    font-size:8px;
+
+    letter-spacing:.16em;
+}
+
+#timeText{
+    display:block;
+    font-size:12px;
+    margin:5px 0 8px;
+}
+
+#date{
+    width:100%;
+
+    padding:7px;
+
+    border-radius:8px;
+
+    border:1px solid rgba(255,255,255,.1);
+
+    background:rgba(255,255,255,.04);
+
+    color:white;
+
+    font-size:10px;
+}
+
+.timeButtons{
+    display:flex;
+    gap:6px;
+    margin-top:7px;
+}
+
+.timeButtons button{
+    flex:1;
+    padding:7px;
+    font-size:9px;
+}
+
+#scale{
+    width:100%;
+    margin-top:7px;
+}
+
+.scaleLabels{
+    display:flex;
+    justify-content:space-between;
+
+    color:#66738a;
+
+    font-size:8px;
+}
+
+.scaleLabels b{
+    color:white;
+}
+
+
+/* mobile */
+
+@media(max-width:700px){
+
+    .subtitle{
+        display:none;
+    }
+
+    .bottom{
+        flex-direction:column-reverse;
+        align-items:stretch;
+    }
+
+    .timeBox,
+    .scaleBox{
+        width:100%;
+    }
+
+    #objectPanel{
+        top:78px;
+    }
+}
