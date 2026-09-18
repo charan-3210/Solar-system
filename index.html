@@ -2,18 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
-  >
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
   <title>COSMOS — Universe Explorer</title>
-
-  <meta
-    name="description"
-    content="COSMOS is an interactive 3D universe explorer."
-  >
+  <meta name="description"
+        content="Interactive 3D universe explorer">
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -22,27 +16,17 @@
 
 <div id="app"></div>
 
-<!-- Loading screen -->
 <div id="loading">
-  <div class="loading-core"></div>
-
-  <div class="loading-title">
-    COSMOS
-  </div>
-
-  <div class="loading-sub">
-    INITIALIZING DEEP SPACE
-  </div>
+  <div class="loader"></div>
+  <div class="loading-logo">C O S M O S</div>
+  <div class="loading-text">ENTERING DEEP SPACE</div>
 </div>
 
-<!-- Top -->
 <header class="topbar">
 
-  <div class="logo">
-    <div class="logo-main">C O S M O S</div>
-    <div class="logo-sub">
-      LIVE UNIVERSE EXPLORER
-    </div>
+  <div class="brand">
+    <div class="brand-title">C O S M O S</div>
+    <div class="brand-subtitle">LIVE UNIVERSE EXPLORER</div>
   </div>
 
   <div class="actions">
@@ -53,25 +37,17 @@
 </header>
 
 
-<!-- Search -->
-<div id="searchPanel" class="glass search-panel hidden">
+<div id="searchPanel" class="panel search-panel hidden">
 
-  <div class="panel-caption">
-    SEARCH UNIVERSE
-  </div>
+  <div class="caption">SEARCH UNIVERSE</div>
 
   <div class="search-row">
-
     <input
       id="searchInput"
       type="search"
-      placeholder="Search galaxy, planet..."
+      placeholder="Galaxy, planet..."
     >
-
-    <button id="searchGo">
-      GO
-    </button>
-
+    <button id="searchGo">GO</button>
   </div>
 
   <div id="searchResults"></div>
@@ -79,26 +55,13 @@
 </div>
 
 
-<!-- Object information -->
-<div id="objectPanel" class="glass object-panel hidden">
+<div id="objectPanel" class="panel object-panel hidden">
 
-  <button
-    id="closeObject"
-    class="close"
-  >
-    ×
-  </button>
+  <button id="closeObject" class="close">×</button>
 
-  <div
-    id="objectCategory"
-    class="panel-caption"
-  >
-    GALAXY
-  </div>
+  <div class="caption">ASTRONOMICAL OBJECT</div>
 
-  <h2 id="objectName">
-    Andromeda Galaxy
-  </h2>
+  <h2 id="objectName">Galaxy</h2>
 
   <p id="objectDescription"></p>
 
@@ -119,15 +82,11 @@
 </div>
 
 
-<!-- Bottom interface -->
-<div class="bottom">
+<div class="bottom-ui">
 
-  <!-- Scale -->
-  <div class="glass scale-box">
+  <div class="panel scale-panel">
 
-    <div class="panel-caption">
-      SCALE
-    </div>
+    <div class="caption">SCALE</div>
 
     <input
       id="scaleSlider"
@@ -137,31 +96,20 @@
       value="0"
     >
 
-    <div class="scale-info">
-
+    <div class="scale-labels">
       <span>UNIVERSE</span>
-
-      <strong id="scaleText">
-        DEEP UNIVERSE
-      </strong>
-
+      <strong id="scaleText">DEEP UNIVERSE</strong>
       <span>STREET</span>
-
     </div>
 
   </div>
 
 
-  <!-- Time -->
-  <div class="glass time-box">
+  <div class="panel time-panel">
 
-    <div class="panel-caption">
-      ASTRONOMICAL TIME
-    </div>
+    <div class="caption">ASTRONOMICAL TIME</div>
 
-    <div id="timeDisplay">
-      --
-    </div>
+    <div id="timeDisplay">--</div>
 
     <input
       id="dateInput"
@@ -170,13 +118,8 @@
 
     <div class="time-buttons">
 
-      <button id="previousDay">
-        − DAY
-      </button>
-
-      <button id="nextDay">
-        + DAY
-      </button>
+      <button id="previousDay">− DAY</button>
+      <button id="nextDay">+ DAY</button>
 
     </div>
 
@@ -185,15 +128,14 @@
 </div>
 
 
-<!-- Navigation -->
 <div id="navigation">
 
-  <span class="desktop-navigation">
-    DRAG ROTATE&nbsp;&nbsp; · &nbsp;&nbsp;SCROLL ZOOM&nbsp;&nbsp; · &nbsp;&nbsp;RIGHT DRAG PAN
+  <span class="desktop">
+    DRAG TO ROTATE · SCROLL TO ZOOM · RIGHT DRAG TO PAN
   </span>
 
-  <span class="mobile-navigation">
-    DRAG ROTATE&nbsp;&nbsp; · &nbsp;&nbsp;PINCH ZOOM
+  <span class="mobile">
+    DRAG TO ROTATE · PINCH TO ZOOM
   </span>
 
 </div>
