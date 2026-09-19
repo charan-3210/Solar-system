@@ -1,147 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-  <title>COSMOS — Universe Explorer</title>
-  <meta name="description"
-        content="Interactive 3D universe explorer">
+<title>COSMOS — 3D Universe Explorer</title>
 
-  <link rel="stylesheet" href="style.css">
+<meta name="theme-color" content="#02040a">
+<meta name="description"
+      content="COSMOS interactive 3D universe and solar system explorer.">
+
+<link rel="stylesheet" href="./style.css">
+
+<link rel="modulepreload" href="./vendor/three.module.js">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/"
+  }
+}
+</script>
 </head>
 
 <body>
 
-<div id="app"></div>
+<div id="app">
 
-<div id="loading">
-  <div class="loader"></div>
-  <div class="loading-logo">C O S M O S</div>
-  <div class="loading-text">ENTERING DEEP SPACE</div>
-</div>
+  <canvas id="space"></canvas>
 
-<header class="topbar">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">COSMOS</div>
+      <div class="brand-sub">UNIVERSE EXPLORER</div>
+    </div>
 
-  <div class="brand">
-    <div class="brand-title">C O S M O S</div>
-    <div class="brand-subtitle">LIVE UNIVERSE EXPLORER</div>
-  </div>
+    <div class="top-actions">
+      <button id="presentBtn">PRESENT</button>
+      <button id="searchBtn">SEARCH</button>
+    </div>
+  </header>
 
-  <div class="actions">
-    <button id="presentBtn">PRESENT</button>
-    <button id="searchBtn">SEARCH</button>
-  </div>
-
-</header>
-
-
-<div id="searchPanel" class="panel search-panel hidden">
-
-  <div class="caption">SEARCH UNIVERSE</div>
-
-  <div class="search-row">
+  <div id="searchPanel" class="panel search-panel hidden">
     <input
       id="searchInput"
       type="search"
-      placeholder="Galaxy, planet..."
+      autocomplete="off"
+      placeholder="Search planet, moon, galaxy..."
     >
-    <button id="searchGo">GO</button>
+    <div id="searchResults"></div>
   </div>
 
-  <div id="searchResults"></div>
+  <aside id="infoPanel" class="panel info-panel hidden">
+    <button id="closeInfo" class="close">×</button>
+    <div id="infoContent"></div>
+  </aside>
 
-</div>
-
-
-<div id="objectPanel" class="panel object-panel hidden">
-
-  <button id="closeObject" class="close">×</button>
-
-  <div class="caption">ASTRONOMICAL OBJECT</div>
-
-  <h2 id="objectName">Galaxy</h2>
-
-  <p id="objectDescription"></p>
-
-  <div class="metadata">
-
-    <div>
-      <span>TYPE</span>
-      <strong id="objectType"></strong>
-    </div>
-
-    <div>
-      <span>STATUS</span>
-      <strong id="objectStatus"></strong>
-    </div>
-
+  <div class="scale-control">
+    <button data-scale="system">SYSTEM</button>
+    <button data-scale="galaxy">GALAXY</button>
+    <button data-scale="universe">UNIVERSE</button>
   </div>
 
-</div>
+  <div class="time-panel">
+    <div class="time-title">TIME</div>
 
+    <input id="dateInput" type="datetime-local">
 
-<div class="bottom-ui">
-
-  <div class="panel scale-panel">
-
-    <div class="caption">SCALE</div>
-
-    <input
-      id="scaleSlider"
-      type="range"
-      min="0"
-      max="100"
-      value="0"
-    >
-
-    <div class="scale-labels">
-      <span>UNIVERSE</span>
-      <strong id="scaleText">DEEP UNIVERSE</strong>
-      <span>STREET</span>
+    <div class="time-actions">
+      <button id="pastBtn">− 1 YEAR</button>
+      <button id="nowBtn">PRESENT</button>
+      <button id="futureBtn">+ 1 YEAR</button>
     </div>
 
+    <div id="timeReadout"></div>
   </div>
 
-
-  <div class="panel time-panel">
-
-    <div class="caption">ASTRONOMICAL TIME</div>
-
-    <div id="timeDisplay">--</div>
-
-    <input
-      id="dateInput"
-      type="datetime-local"
-    >
-
-    <div class="time-buttons">
-
-      <button id="previousDay">− DAY</button>
-      <button id="nextDay">+ DAY</button>
-
-    </div>
-
+  <div id="status">
+    <span class="status-dot"></span>
+    <span id="statusText">COSMOS READY</span>
   </div>
 
 </div>
 
-
-<div id="navigation">
-
-  <span class="desktop">
-    DRAG TO ROTATE · SCROLL TO ZOOM · RIGHT DRAG TO PAN
-  </span>
-
-  <span class="mobile">
-    DRAG TO ROTATE · PINCH TO ZOOM
-  </span>
-
-</div>
-
-
-<script type="module" src="app.js"></script>
+<script type="module" src="./app.js"></script>
 
 </body>
 </html>
