@@ -9,7 +9,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
+  background: #02040a;
   color: #fff;
   font-family:
     Inter,
@@ -27,653 +27,308 @@ body {
 #app {
   position: fixed;
   inset: 0;
+  overflow: hidden;
 }
 
-canvas {
-  display: block;
+#space {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  display: block;
+  outline: none;
 }
-
-
-/* ================================
-   LOADING
-================================ */
-
-#loading {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  background:
-    radial-gradient(
-      circle at center,
-      #071020 0%,
-      #02050b 42%,
-      #000 80%
-    );
-
-  transition:
-    opacity .45s ease,
-    visibility .45s ease;
-}
-
-#loading.hide {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.loader {
-  width: 48px;
-  height: 48px;
-
-  border-radius: 50%;
-
-  border:
-    2px solid
-    rgba(255,255,255,.08);
-
-  border-top-color:
-    rgba(255,255,255,.9);
-
-  box-shadow:
-    0 0 30px
-    rgba(90,150,255,.3);
-
-  animation:
-    spin .8s linear infinite;
-}
-
-.loading-logo {
-  margin-top: 24px;
-
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: 10px;
-}
-
-.loading-text {
-  margin-top: 9px;
-
-  font-size: 8px;
-  letter-spacing: 3px;
-
-  opacity: .4;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
-/* ================================
-   TOP BAR
-================================ */
 
 .topbar {
-  position: fixed;
-  z-index: 50;
-
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
 
-  padding: 27px 30px;
+  height: 76px;
+  padding: 18px 22px;
 
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 
   pointer-events: none;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(2,4,10,.8),
+      rgba(2,4,10,.18),
+      transparent
+    );
 }
 
-.brand {
-  pointer-events: none;
-}
-
-.brand-title {
-  font-size: 23px;
-  font-weight: 700;
-  letter-spacing: 9px;
-}
-
-.brand-subtitle {
-  margin-top: 7px;
-
-  font-size: 8px;
-  letter-spacing: 3px;
-
-  opacity: .38;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-
+.brand,
+.top-actions {
   pointer-events: auto;
 }
 
-button {
-  min-height: 49px;
-
-  padding: 0 20px;
-
-  color: white;
-
-  background:
-    rgba(7,10,18,.74);
-
-  border:
-    1px solid
-    rgba(255,255,255,.15);
-
-  border-radius: 16px;
-
-  font-size: 11px;
+.brand-title {
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: 1px;
-
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  cursor: pointer;
-
-  transition: .18s ease;
+  letter-spacing: 7px;
 }
 
-button:hover {
-  background:
-    rgba(28,35,50,.85);
+.brand-sub {
+  margin-top: 3px;
+  font-size: 8px;
+  letter-spacing: 3px;
+  opacity: .55;
+}
 
-  border-color:
-    rgba(255,255,255,.3);
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(5,8,15,.62);
+  color: #fff;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
 }
 
 button:active {
-  transform: scale(.96);
+  transform: scale(.97);
 }
 
-
-/* ================================
-   GLASS PANELS
-================================ */
+button:hover {
+  background: rgba(255,255,255,.1);
+}
 
 .panel {
-  background:
-    linear-gradient(
-      145deg,
-      rgba(11,16,27,.88),
-      rgba(2,4,9,.74)
-    );
-
-  border:
-    1px solid
-    rgba(255,255,255,.13);
-
-  box-shadow:
-    0 20px 70px
-    rgba(0,0,0,.42),
-
-    inset 0 1px
-    rgba(255,255,255,.04);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.caption {
-  font-size: 8px;
-  letter-spacing: 2px;
-  opacity: .42;
+  position: absolute;
+  background: rgba(5,8,15,.82);
+  border: 1px solid rgba(255,255,255,.13);
+  backdrop-filter: blur(18px);
+  border-radius: 12px;
+  box-shadow: 0 15px 60px rgba(0,0,0,.35);
 }
 
 .hidden {
   display: none !important;
 }
 
-
-/* ================================
-   SEARCH
-================================ */
-
 .search-panel {
-  position: fixed;
-  z-index: 100;
-
-  top: 96px;
-  right: 24px;
-
-  width:
-    min(420px, calc(100vw - 48px));
-
-  padding: 20px;
-
-  border-radius: 22px;
+  top: 84px;
+  right: 20px;
+  width: min(360px, calc(100vw - 40px));
+  padding: 12px;
 }
 
-.search-row {
-  display: flex;
-  gap: 8px;
-
-  margin-top: 13px;
-}
-
-.search-row input {
-  flex: 1;
-  min-width: 0;
-
-  height: 48px;
-
-  padding: 0 14px;
-
-  color: white;
-
-  background:
-    rgba(255,255,255,.035);
-
-  border:
-    1px solid
-    rgba(255,255,255,.12);
-
-  border-radius: 12px;
-
+#searchInput {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.12);
   outline: none;
-
-  font-size: 13px;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
-.search-row input:focus {
-  border-color:
-    rgba(255,255,255,.35);
+#searchResults {
+  margin-top: 8px;
+  max-height: 300px;
+  overflow: auto;
 }
 
-.search-row button {
-  min-height: 48px;
-  border-radius: 12px;
-}
-
-.search-result {
-  padding: 13px 3px;
-
-  border-bottom:
-    1px solid
-    rgba(255,255,255,.07);
-
+.result {
+  padding: 10px;
+  border-radius: 7px;
   cursor: pointer;
+}
+
+.result:hover {
+  background: rgba(255,255,255,.08);
 }
 
 .result-name {
   font-size: 13px;
-  font-weight: 600;
 }
 
 .result-type {
-  margin-top: 4px;
-
-  font-size: 8px;
-  letter-spacing: 1.5px;
-
-  opacity: .4;
+  font-size: 9px;
+  opacity: .5;
+  margin-top: 3px;
+  letter-spacing: 1px;
 }
 
-
-/* ================================
-   OBJECT PANEL
-================================ */
-
-.object-panel {
-  position: fixed;
-  z-index: 90;
-
-  top: 110px;
-  left: 24px;
-
-  width:
-    min(360px, calc(100vw - 48px));
-
-  padding: 22px;
-
-  border-radius: 22px;
+.info-panel {
+  left: 20px;
+  bottom: 20px;
+  width: min(330px, calc(100vw - 40px));
+  padding: 20px;
 }
 
 .close {
   position: absolute;
-
-  top: 8px;
-  right: 8px;
-
-  width: 35px;
-  min-height: 35px;
-
-  padding: 0;
-
-  border-radius: 50%;
-
-  font-size: 23px;
-  font-weight: 300;
-}
-
-.object-panel h2 {
-  margin:
-    9px 0 10px;
-
-  font-size: 24px;
-  line-height: 1.15;
-}
-
-.object-panel p {
-  margin: 0;
-
-  font-size: 13px;
-  line-height: 1.6;
-
-  opacity: .62;
-}
-
-.metadata {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 9px;
-
-  margin-top: 18px;
-}
-
-.metadata div {
-  padding: 11px;
-
-  background:
-    rgba(255,255,255,.035);
-
-  border-radius: 11px;
-}
-
-.metadata span {
-  display: block;
-
-  font-size: 7px;
-  letter-spacing: 2px;
-
-  opacity: .4;
-}
-
-.metadata strong {
-  display: block;
-
-  margin-top: 5px;
-
-  font-size: 10px;
-}
-
-
-/* ================================
-   BOTTOM UI
-================================ */
-
-.bottom-ui {
-  position: fixed;
-  z-index: 50;
-
-  left: 24px;
-  right: 24px;
-  bottom: 17px;
-
-  pointer-events: none;
-}
-
-.scale-panel,
-.time-panel {
-  pointer-events: auto;
-}
-
-.scale-panel {
-  padding: 16px 20px 13px;
-
-  border-radius: 24px;
-}
-
-#scaleSlider {
-  display: block;
-
-  width: 100%;
-
-  margin-top: 13px;
-
-  appearance: none;
-  -webkit-appearance: none;
-
-  height: 5px;
-
-  background:
-    rgba(255,255,255,.85);
-
-  border-radius: 10px;
-
-  outline: none;
-}
-
-#scaleSlider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-
-  width: 26px;
-  height: 26px;
-
-  border-radius: 50%;
-
-  background: #248cff;
-
-  box-shadow:
-    0 0 18px
-    rgba(36,140,255,.5);
-}
-
-#scaleSlider::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
-
+  right: 9px;
+  top: 7px;
   border: 0;
-  border-radius: 50%;
-
-  background: #248cff;
+  background: transparent;
+  font-size: 22px;
+  padding: 3px 7px;
 }
 
-.scale-labels {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: center;
-
-  margin-top: 8px;
-
-  font-size: 8px;
-
-  opacity: .4;
+.info-title {
+  font-size: 22px;
+  letter-spacing: 2px;
 }
 
-.scale-labels strong {
-  color: white;
-
+.info-type {
+  margin-top: 4px;
   font-size: 9px;
-
-  opacity: 1;
+  letter-spacing: 2px;
+  opacity: .5;
 }
 
+.info-line {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.7;
+  opacity: .78;
+}
 
-/* ================================
-   TIME
-================================ */
+.scale-control {
+  position: absolute;
+  top: 90px;
+  left: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scale-control button {
+  font-size: 8px;
+  padding: 7px 9px;
+}
 
 .time-panel {
-  margin-top: 9px;
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
 
-  padding: 16px 20px;
+  width: min(470px, calc(100vw - 30px));
 
-  border-radius: 24px;
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 11px;
+
+  background: rgba(3,6,12,.66);
+  backdrop-filter: blur(15px);
 }
 
-#timeDisplay {
-  margin:
-    7px 0 12px;
-
-  font-size: 17px;
-  font-weight: 600;
+.time-title {
+  font-size: 8px;
+  letter-spacing: 2px;
+  opacity: .5;
+  margin-bottom: 7px;
 }
 
 #dateInput {
   width: 100%;
-  height: 46px;
-
-  color: white;
-
-  background:
-    rgba(255,255,255,.035);
-
-  border:
-    1px solid
-    rgba(255,255,255,.12);
-
-  border-radius: 12px;
-
-  padding: 0 12px;
-
-  outline: none;
-
-  font-size: 12px;
+  color: #fff;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 7px;
+  padding: 8px;
 }
 
-#dateInput::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: .6;
+.time-actions {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 7px;
 }
 
-.time-buttons {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 9px;
-
-  margin-top: 9px;
+.time-actions button {
+  font-size: 8px;
+  padding: 7px 8px;
 }
 
-.time-buttons button {
-  min-height: 42px;
-  border-radius: 12px;
+#timeReadout {
+  text-align: center;
+  margin-top: 7px;
+  font-size: 9px;
+  opacity: .48;
 }
 
+#status {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
 
-/* ================================
-   NAVIGATION
-================================ */
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-#navigation {
-  position: fixed;
-
-  z-index: 20;
-
-  bottom: 2px;
-  left: 50%;
-
-  transform:
-    translateX(-50%);
-
-  font-size: 7px;
-  letter-spacing: 1.5px;
-
-  opacity: .25;
-
-  white-space: nowrap;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  opacity: .45;
 
   pointer-events: none;
 }
 
-.mobile {
-  display: none;
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #76ffb0;
+  box-shadow: 0 0 12px #76ffb0;
 }
 
-
-/* ================================
-   MOBILE
-================================ */
-
-@media(max-width:700px) {
+@media (max-width: 600px) {
 
   .topbar {
-    padding: 25px 18px;
+    height: 65px;
+    padding: 14px;
   }
 
   .brand-title {
-    font-size: 18px;
-    letter-spacing: 7px;
+    font-size: 19px;
+    letter-spacing: 5px;
   }
 
-  .brand-subtitle {
-    font-size: 6px;
+  .brand-sub {
+    font-size: 7px;
   }
 
-  .actions {
-    gap: 6px;
+  .top-actions button {
+    padding: 8px 9px;
+    font-size: 8px;
   }
 
-  .actions button {
-    min-height: 44px;
-
-    padding: 0 13px;
-
-    font-size: 9px;
+  .scale-control {
+    top: 78px;
+    left: 12px;
   }
 
-  .search-panel {
-    top: 83px;
-    right: 13px;
-
-    width:
-      calc(100vw - 26px);
-  }
-
-  .object-panel {
-    top: 88px;
-    left: 13px;
-
-    width:
-      calc(100vw - 26px);
-  }
-
-  .bottom-ui {
-    left: 13px;
-    right: 13px;
-    bottom: 12px;
-  }
-
-  .scale-panel {
-    padding: 14px 15px 11px;
+  .info-panel {
+    left: 12px;
+    bottom: 105px;
+    width: calc(100vw - 24px);
   }
 
   .time-panel {
-    padding: 14px 15px;
+    bottom: 12px;
   }
 
-  #timeDisplay {
-    font-size: 15px;
+  #status {
+    right: 12px;
+    bottom: 82px;
   }
-
-  .desktop {
-    display: none;
-  }
-
-  .mobile {
-    display: inline;
-  }
-  }
+}
