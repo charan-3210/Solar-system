@@ -1,287 +1,408 @@
-import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js";
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-import { OrbitControls } from
-"https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/controls/OrbitControls.js";
+/* =========================================================
+   COSMOS 1.0
+   Fast-start 3D universe explorer
+   ========================================================= */
 
+const canvas = document.getElementById("space");
 
-/* ============================================================
-   COSMOS — FAST START ENGINE
-============================================================ */
+const scene = new THREE.Scene();
 
+scene.background = new THREE.Color(0x010207);
 
-/* ============================================================
-   DEVICE
-============================================================ */
+const camera = new THREE.PerspectiveCamera(
+  55,
+  innerWidth / innerHeight,
+  0.01,
+  100000
+);
 
-const isMobile =
-  /Android|iPhone|iPad|iPod/i
-    .test(navigator.userAgent);
+camera.position.set(0, 18, 45);
 
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: innerWidth > 700,
+  powerPreference: "high-performance"
+});
 
-/* ============================================================
-   RENDERER
-============================================================ */
-
-const renderer =
-  new THREE.WebGLRenderer({
-
-    antialias:
-      !isMobile,
-
-    powerPreference:
-      "high-performance",
-
-    logarithmicDepthBuffer:
-      true
-
-  });
-
+renderer.setSize(innerWidth, innerHeight, false);
 
 renderer.setPixelRatio(
-  Math.min(
-    window.devicePixelRatio || 1,
-    isMobile ? 1.25 : 1.6
-  )
+  innerWidth < 700 ? 1 : Math.min(devicePixelRatio, 1.25)
 );
 
-renderer.setSize(
-  window.innerWidth,
-  window.innerHeight
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const controls = new OrbitControls(
+  camera,
+  renderer.domElement
 );
 
-renderer.outputColorSpace =
-  THREE.SRGBColorSpace;
+controls.enableDamping = true;
+controls.dampingFactor = 0.055;
 
-renderer.toneMapping =
-  THREE.ACESFilmicToneMapping;
+controls.minDistance = 2;
+controls.maxDistance = 50000;
 
-renderer.toneMappingExposure =
-  1.15;
+controls.enablePan = true;
 
-document
-  .getElementById("app")
-  .appendChild(
-    renderer.domElement
-  );
+controls.target.set(0, 0, 0);
 
+const clock = new THREE.Clock();
 
-/* ============================================================
-   SCENE
-============================================================ */
+/* =========================================================
+   DATA
+   ========================================================= */
 
-const scene =
-  new THREE.Scene();
+const objects = [];
 
-scene.background =
-  new THREE.Color(
-    0x000104
-  );
+const planets = [
+  {
+    name: "Mercury",
+    radius: .38,
+    distance: 5,
+    color: 0x999999,
+    period: 87.97,
+    type: "PLANET"
+  },
+  {
+    name: "Venus",
+    radius: .72,
+    distance: 7,
+    color: 0xd8a95b,
+    period: 224.7,
+    type: "PLANET"
+  },
+  {
+    name: "Earth",
+    radius: .82,
+    distance: 9.5,
+    color: 0x3f83ff,
+    period: 365.25,
+    type: "PLANET"
+  },
+  {
+    name: "Mars",
+    radius: .58,
+    distance: 12,
+    color: 0xd75d38,
+    period: 686.98,
+    type: "PLANET"
+  },
+  {
+    name: "Jupiter",
+    radius: 2.7,
+    distance: 18,
+    color: 0xc99a72,
+    period: 4332.6,
+    type: "PLANET"
+  },
+  {
+    name: "Saturn",
+    radius: 2.25,
+    distance: 25,
+    color: 0xd8c08b,
+    period: 10759,
+    type: "PLANET"
+  },
+  {
+    name: "Uranus",
+    radius: 1.45,
+    distance: 32,
+    color: 0x77cfe0,
+    period: 30687,
+    type: "PLANET"
+  },
+  {
+    name: "Neptune",
+    radius: 1.4,
+    distance: 39,
+    color: 0x416be8,
+    period: 60190,
+    type: "PLANET"
+  }
+];
 
+const galaxies = [
+  ["Milky Way", 0, 0, 0],
+  ["Andromeda Galaxy", 220, 35, -90],
+  ["Triangulum Galaxy", -250, 60, 80],
+  ["Whirlpool Galaxy", 500, -100, -300],
+  ["Sombrero Galaxy", -520, 170, -160],
+  ["Pinwheel Galaxy", 620, 90, 360],
+  ["Black Eye Galaxy", -700, -120, 300],
+  ["Sunflower Galaxy", 850, 240, -420],
+  ["Cigar Galaxy", -900, 300, 500],
+  ["Cartwheel Galaxy", 1100, -250, -500],
+  ["Tadpole Galaxy", -1250, -300, -300],
+  ["Large Magellanic Cloud", 300, -500, 850],
+  ["Small Magellanic Cloud", -350, -550, 900],
+  ["Centaurus A", 1400, 450, -800],
+  ["Messier 87", -1500, 600, -650],
+  ["NGC 1300", 1700, -500, 600],
+  ["NGC 1365", -1750, 400, 700],
+  ["NGC 4414", 1900, 700, -400],
+  ["NGC 6744", -2000, -700, 400],
+  ["NGC 6946", 2150, 800, 500]
+];
 
-/* ============================================================
-   CAMERA
-============================================================ */
+/* =========================================================
+   UTILITIES
+   ========================================================= */
 
-const camera =
-  new THREE.PerspectiveCamera(
-    55,
-    window.innerWidth /
-      window.innerHeight,
-    .01,
-    150000
-  );
-
-camera.position.set(
-  0,
-  900,
-  4200
-);
-
-
-/* ============================================================
-   CONTROLS
-============================================================ */
-
-const controls =
-  new OrbitControls(
-    camera,
-    renderer.domElement
-  );
-
-controls.enableDamping =
-  true;
-
-controls.dampingFactor =
-  .065;
-
-controls.rotateSpeed =
-  .5;
-
-controls.zoomSpeed =
-  .85;
-
-controls.panSpeed =
-  .55;
-
-controls.enablePan =
-  true;
-
-controls.screenSpacePanning =
-  true;
-
-controls.minDistance =
-  .2;
-
-controls.maxDistance =
-  100000;
-
-controls.target.set(
-  0,
-  0,
-  0
-);
-
-
-/* ============================================================
-   BASIC HELPERS
-============================================================ */
-
-function random(
-  min,
-  max
-) {
-  return min +
-    Math.random() *
-    (max - min);
+function addObject(object) {
+  objects.push(object);
+  return object;
 }
 
-function clamp(
-  value,
-  min,
-  max
-) {
-  return Math.max(
-    min,
-    Math.min(max, value)
+function glowTexture(size = 64) {
+
+  const c = document.createElement("canvas");
+
+  c.width = size;
+  c.height = size;
+
+  const ctx = c.getContext("2d");
+
+  const g = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2
   );
+
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(.12, "rgba(255,255,255,.95)");
+  g.addColorStop(.35, "rgba(255,255,255,.35)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+
+  const texture = new THREE.CanvasTexture(c);
+
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  return texture;
 }
 
+const glow = glowTexture();
 
-/* ============================================================
-   FAST STAR FIELD
-============================================================ */
+/* =========================================================
+   STARS
+   ========================================================= */
 
-function createStars() {
+function createStars(count) {
 
-  const count =
-    isMobile
-      ? 6500
-      : 14000;
+  const positions = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
 
-  const positions =
-    new Float32Array(
-      count * 3
-    );
+  for (let i = 0; i < count; i++) {
 
-  const colors =
-    new Float32Array(
-      count * 3
-    );
+    const r = 80 + Math.random() * 900;
 
-  const starColor =
-    new THREE.Color();
-
-  for (
-    let i = 0;
-    i < count;
-    i++
-  ) {
-
-    const radius =
-      9000 *
-      Math.pow(
-        Math.random(),
-        .42
-      );
-
-    const theta =
-      Math.random() *
-      Math.PI * 2;
-
-    const phi =
-      Math.acos(
-        random(-1, 1)
-      );
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
 
     positions[i * 3] =
-      radius *
-      Math.sin(phi) *
-      Math.cos(theta);
+      r * Math.sin(phi) * Math.cos(theta);
 
     positions[i * 3 + 1] =
-      radius *
-      Math.cos(phi);
+      r * Math.cos(phi);
 
     positions[i * 3 + 2] =
-      radius *
-      Math.sin(phi) *
-      Math.sin(theta);
+      r * Math.sin(phi) * Math.sin(theta);
 
-
-    const temperature =
-      Math.random();
-
-    if (
-      temperature < .15
-    ) {
-
-      starColor.setRGB(
-        1,
-        .72,
-        .5
-      );
-
-    } else if (
-      temperature < .45
-    ) {
-
-      starColor.setRGB(
-        1,
-        .9,
-        .72
-      );
-
-    } else if (
-      temperature < .82
-    ) {
-
-      starColor.setRGB(
-        .78,
-        .88,
-        1
-      );
-
-    } else {
-
-      starColor.setRGB(
-        .55,
-        .7,
-        1
-      );
-
-    }
-
-    colors[i * 3] =
-      starColor.r;
-
-    colors[i * 3 + 1] =
-      starColor.g;
-
-    colors[i * 3 + 2] =
-      starColor.b;
+    sizes[i] =
+      .5 + Math.random() * 1.7;
   }
 
+  const geometry = new THREE.BufferGeometry();
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3)
+  );
+
+  const material = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: innerWidth < 700 ? .55 : .75,
+    map: glow,
+    transparent: true,
+    opacity: .8,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+
+  scene.add(new THREE.Points(
+    geometry,
+    material
+  ));
+}
+
+createStars(
+  innerWidth < 700 ? 2400 : 5200
+);
+
+/* =========================================================
+   SUN
+   ========================================================= */
+
+const sun = new THREE.Mesh(
+  new THREE.SphereGeometry(2.1, 32, 32),
+  new THREE.MeshBasicMaterial({
+    color: 0xffb347
+  })
+);
+
+scene.add(sun);
+
+addObject({
+  name: "Sun",
+  type: "STAR",
+  object: sun
+});
+
+const sunLight = new THREE.PointLight(
+  0xffffff,
+  1200,
+  500
+);
+
+scene.add(sunLight);
+
+/* =========================================================
+   ORBITS
+   ========================================================= */
+
+function createOrbit(radius) {
+
+  const points = [];
+
+  for (let i = 0; i <= 128; i++) {
+
+    const a =
+      (i / 128) * Math.PI * 2;
+
+    points.push(
+      new THREE.Vector3(
+        Math.cos(a) * radius,
+        0,
+        Math.sin(a) * radius
+      )
+    );
+  }
+
+  const geometry =
+    new THREE.BufferGeometry()
+      .setFromPoints(points);
+
+  const material =
+    new THREE.LineBasicMaterial({
+      color: 0x426080,
+      transparent: true,
+      opacity: .24
+    });
+
+  return new THREE.Line(
+    geometry,
+    material
+  );
+}
+
+/* =========================================================
+   PLANETS
+   ========================================================= */
+
+const planetMeshes = [];
+
+for (const p of planets) {
+
+  scene.add(createOrbit(p.distance));
+
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(
+      p.radius,
+      innerWidth < 700 ? 18 : 28,
+      innerWidth < 700 ? 18 : 28
+    ),
+    new THREE.MeshStandardMaterial({
+      color: p.color,
+      roughness: .8,
+      metalness: .05
+    })
+  );
+
+  mesh.userData = p;
+
+  scene.add(mesh);
+
+  planetMeshes.push({
+    mesh,
+    data: p
+  });
+
+  addObject({
+    ...p,
+    object: mesh
+  });
+
+  if (p.name === "Saturn") {
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(
+        p.radius * 1.45,
+        p.radius * 2.35,
+        64
+      ),
+      new THREE.MeshBasicMaterial({
+        color: 0xb7a47d,
+        transparent: true,
+        opacity: .62,
+        side: THREE.DoubleSide
+      })
+    );
+
+    ring.rotation.x =
+      Math.PI / 2.15;
+
+    mesh.add(ring);
+  }
+}
+
+/* =========================================================
+   ASTEROID BELT
+   ========================================================= */
+
+function createAsteroidBelt() {
+
+  const count =
+    innerWidth < 700 ? 500 : 1000;
+
+  const positions =
+    new Float32Array(count * 3);
+
+  for (let i = 0; i < count; i++) {
+
+    const a =
+      Math.random() * Math.PI * 2;
+
+    const r =
+      14 + Math.random() * 2.4;
+
+    positions[i * 3] =
+      Math.cos(a) * r;
+
+    positions[i * 3 + 1] =
+      (Math.random() - .5) * .6;
+
+    positions[i * 3 + 2] =
+      Math.sin(a) * r;
+  }
 
   const geometry =
     new THREE.BufferGeometry();
@@ -294,94 +415,54 @@ function createStars() {
     )
   );
 
-  geometry.setAttribute(
-    "color",
-    new THREE.BufferAttribute(
-      colors,
-      3
-    )
-  );
-
-
   const material =
     new THREE.PointsMaterial({
-
-      size:
-        isMobile
-          ? 1.15
-          : 1.4,
-
-      vertexColors:
-        true,
-
-      transparent:
-        true,
-
-      opacity:
-        .78,
-
-      depthWrite:
-        false,
-
-      blending:
-        THREE.AdditiveBlending
-
+      color: 0x8c806f,
+      size: .08,
+      transparent: true,
+      opacity: .6
     });
 
-
-  const points =
+  scene.add(
     new THREE.Points(
       geometry,
       material
-    );
-
-  scene.add(
-    points
+    )
   );
-
-  return points;
 }
 
+setTimeout(
+  createAsteroidBelt,
+  250
+);
 
-/*
-  IMPORTANT:
-  Stars are created immediately.
-*/
+/* =========================================================
+   GALAXIES
+   ========================================================= */
 
-const stars =
-  createStars();
+function createGalaxyTexture() {
 
+  const size = 256;
 
-/* ============================================================
-   GLOW TEXTURE
-============================================================ */
+  const c =
+    document.createElement("canvas");
 
-function createGlowTexture() {
+  c.width = size;
+  c.height = size;
 
-  const canvas =
-    document.createElement(
-      "canvas"
-    );
+  const ctx = c.getContext("2d");
 
-  canvas.width =
-    256;
-
-  canvas.height =
-    256;
-
-  const ctx =
-    canvas.getContext(
-      "2d"
-    );
+  const cx = size / 2;
+  const cy = size / 2;
 
   const gradient =
     ctx.createRadialGradient(
-      128,
-      128,
-      0,
-      128,
-      128,
-      128
+      cx,
+      cy,
+      2,
+      cx,
+      cy,
+      size / 2
     );
 
   gradient.addColorStop(
@@ -391,17 +472,12 @@ function createGlowTexture() {
 
   gradient.addColorStop(
     .08,
-    "rgba(255,255,255,.95)"
+    "rgba(255,245,210,.9)"
   );
 
   gradient.addColorStop(
-    .25,
-    "rgba(180,210,255,.5)"
-  );
-
-  gradient.addColorStop(
-    .55,
-    "rgba(80,130,255,.1)"
+    .3,
+    "rgba(150,190,255,.35)"
   );
 
   gradient.addColorStop(
@@ -409,115 +485,7 @@ function createGlowTexture() {
     "rgba(0,0,0,0)"
   );
 
-  ctx.fillStyle =
-    gradient;
-
-  ctx.fillRect(
-    0,
-    0,
-    256,
-    256
-  );
-
-  return new THREE.CanvasTexture(
-    canvas
-  );
-}
-
-
-const glowTexture =
-  createGlowTexture();
-
-
-/* ============================================================
-   GALAXY TEXTURES
-   ONLY FOUR ARE CREATED.
-   They are reused for all galaxies.
-============================================================ */
-
-const galaxyTextureCache =
-  new Map();
-
-
-function createGalaxyTexture(
-  style
-) {
-
-  if (
-    galaxyTextureCache.has(
-      style
-    )
-  ) {
-
-    return galaxyTextureCache.get(
-      style
-    );
-
-  }
-
-
-  const size =
-    isMobile
-      ? 384
-      : 512;
-
-  const canvas =
-    document.createElement(
-      "canvas"
-    );
-
-  canvas.width =
-    size;
-
-  canvas.height =
-    size;
-
-  const ctx =
-    canvas.getContext(
-      "2d"
-    );
-
-  const cx =
-    size / 2;
-
-  const cy =
-    size / 2;
-
-
-  /* Soft outer glow */
-
-  const glow =
-    ctx.createRadialGradient(
-      cx,
-      cy,
-      0,
-      cx,
-      cy,
-      size * .48
-    );
-
-  glow.addColorStop(
-    0,
-    "rgba(230,240,255,.75)"
-  );
-
-  glow.addColorStop(
-    .15,
-    "rgba(180,210,255,.35)"
-  );
-
-  glow.addColorStop(
-    .4,
-    "rgba(100,150,255,.09)"
-  );
-
-  glow.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-  );
-
-  ctx.fillStyle =
-    glow;
+  ctx.fillStyle = gradient;
 
   ctx.fillRect(
     0,
@@ -526,1582 +494,291 @@ function createGalaxyTexture(
     size
   );
 
-
-  if (
-    style ===
-    "elliptical"
-  ) {
-
-    const core =
-      ctx.createRadialGradient(
-        cx,
-        cy,
-        0,
-        cx,
-        cy,
-        size * .4
-      );
-
-    core.addColorStop(
-      0,
-      "rgba(255,250,230,1)"
-    );
-
-    core.addColorStop(
-      .2,
-      "rgba(255,220,175,.72)"
-    );
-
-    core.addColorStop(
-      .5,
-      "rgba(220,190,150,.2)"
-    );
-
-    core.addColorStop(
-      1,
-      "rgba(0,0,0,0)"
-    );
-
-    ctx.fillStyle =
-      core;
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-      cx,
-      cy,
-      size * .4,
-      size * .22,
-      0,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-  } else {
-
-    const arms =
-      style ===
-      "barred"
-        ? 2
-        : 4;
-
-
-    for (
-      let arm = 0;
-      arm < arms;
-      arm++
-    ) {
-
-      ctx.beginPath();
-
-      const offset =
-        arm /
-        arms *
-        Math.PI * 2;
-
-      for (
-        let t = 0;
-        t < Math.PI * 4.5;
-        t += .025
-      ) {
-
-        const r =
-          t /
-          (Math.PI * 4.5) *
-          size *
-          .42;
-
-        const angle =
-          t * 1.65 +
-          offset;
-
-        const x =
-          cx +
-          Math.cos(angle) *
-          r;
-
-        const y =
-          cy +
-          Math.sin(angle) *
-          r *
-          .46;
-
-        if (
-          t === 0
-        ) {
-          ctx.moveTo(
-            x,
-            y
-          );
-        } else {
-          ctx.lineTo(
-            x,
-            y
-          );
-        }
-
-      }
-
-      ctx.strokeStyle =
-        style === "irregular"
-          ? "rgba(190,190,255,.18)"
-          : "rgba(190,215,255,.3)";
-
-      ctx.lineWidth =
-        size * .025;
-
-      ctx.shadowBlur =
-        18;
-
-      ctx.shadowColor =
-        "rgba(130,180,255,.8)";
-
-      ctx.stroke();
-
-    }
-
-
-    /* Central bulge */
-
-    const core =
-      ctx.createRadialGradient(
-        cx,
-        cy,
-        0,
-        cx,
-        cy,
-        size * .18
-      );
-
-    core.addColorStop(
-      0,
-      "rgba(255,255,245,1)"
-    );
-
-    core.addColorStop(
-      .2,
-      "rgba(255,230,190,.85)"
-    );
-
-    core.addColorStop(
-      .55,
-      "rgba(255,210,160,.15)"
-    );
-
-    core.addColorStop(
-      1,
-      "rgba(0,0,0,0)"
-    );
-
-    ctx.fillStyle =
-      core;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      cx,
-      cy,
-      size * .19,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-  }
-
-
-  const texture =
-    new THREE.CanvasTexture(
-      canvas
-    );
-
-  texture.colorSpace =
-    THREE.SRGBColorSpace;
-
-  texture.minFilter =
-    THREE.LinearFilter;
-
-  texture.magFilter =
-    THREE.LinearFilter;
-
-  galaxyTextureCache.set(
-    style,
-    texture
-  );
-
-  return texture;
-}
-
-
-/* ============================================================
-   GALAXY DATA
-============================================================ */
-
-const GALAXIES = [
-
-  ["Milky Way",
-   "Barred Spiral Galaxy",
-   "The galaxy containing our Solar System.",
-   [0,0,0],
-   180,
-   "barred"],
-
-  ["Andromeda Galaxy (M31)",
-   "Spiral Galaxy",
-   "A large spiral galaxy in the Local Group.",
-   [650,120,-250],
-   130,
-   "spiral"],
-
-  ["Triangulum Galaxy (M33)",
-   "Spiral Galaxy",
-   "A spiral galaxy and member of the Local Group.",
-   [-500,-80,-380],
-   85,
-   "spiral"],
-
-  ["Large Magellanic Cloud",
-   "Irregular Galaxy",
-   "An irregular satellite galaxy of the Milky Way.",
-   [340,-220,390],
-   52,
-   "irregular"],
-
-  ["Small Magellanic Cloud",
-   "Dwarf Irregular Galaxy",
-   "A dwarf irregular galaxy associated with the Milky Way.",
-   [430,-270,470],
-   38,
-   "irregular"],
-
-  ["Whirlpool Galaxy (M51)",
-   "Spiral Galaxy",
-   "An interacting spiral galaxy system.",
-   [-900,350,-650],
-   105,
-   "spiral"],
-
-  ["Sombrero Galaxy (M104)",
-   "Spiral Galaxy",
-   "A galaxy known for its bright bulge and prominent dust lane.",
-   [1000,-350,-850],
-   95,
-   "spiral"],
-
-  ["Pinwheel Galaxy (M101)",
-   "Spiral Galaxy",
-   "A large asymmetric spiral galaxy.",
-   [-1000,520,380],
-   125,
-   "spiral"],
-
-  ["Bode's Galaxy (M81)",
-   "Spiral Galaxy",
-   "A grand-design spiral galaxy in Ursa Major.",
-   [900,600,550],
-   90,
-   "spiral"],
-
-  ["Cigar Galaxy (M82)",
-   "Starburst Galaxy",
-   "An actively star-forming galaxy near M81.",
-   [850,670,600],
-   58,
-   "irregular"],
-
-  ["Black Eye Galaxy (M64)",
-   "Spiral Galaxy",
-   "A spiral galaxy with a prominent dark dust feature.",
-   [-1250,-420,-150],
-   78,
-   "spiral"],
-
-  ["Sunflower Galaxy (M63)",
-   "Spiral Galaxy",
-   "A flocculent spiral galaxy.",
-   [1250,260,-400],
-   84,
-   "spiral"],
-
-  ["Southern Pinwheel Galaxy (M83)",
-   "Barred Spiral Galaxy",
-   "A prominent barred spiral galaxy.",
-   [-720,-650,700],
-   94,
-   "barred"],
-
-  ["Centaurus A",
-   "Peculiar Galaxy",
-   "A nearby galaxy with a prominent dust lane.",
-   [680,-780,820],
-   82,
-   "irregular"],
-
-  ["Sculptor Galaxy (NGC 253)",
-   "Spiral Galaxy",
-   "A nearby star-forming spiral galaxy.",
-   [-1200,-600,850],
-   92,
-   "spiral"],
-
-  ["Messier 87",
-   "Giant Elliptical Galaxy",
-   "A giant elliptical galaxy associated with the Virgo Cluster.",
-   [1550,650,-900],
-   130,
-   "elliptical"],
-
-  ["Messier 49",
-   "Elliptical Galaxy",
-   "A giant elliptical galaxy in the Virgo Cluster.",
-   [1660,760,-980],
-   92,
-   "elliptical"],
-
-  ["Messier 60",
-   "Elliptical Galaxy",
-   "A giant elliptical galaxy in the Virgo Cluster region.",
-   [1730,700,-820],
-   80,
-   "elliptical"],
-
-  ["NGC 1300",
-   "Barred Spiral Galaxy",
-   "A well-studied barred spiral galaxy.",
-   [-1700,220,-760],
-   92,
-   "barred"],
-
-  ["NGC 1365",
-   "Barred Spiral Galaxy",
-   "A large barred spiral galaxy.",
-   [1850,-330,820],
-   112,
-   "barred"],
-
-  ["NGC 4038",
-   "Interacting Galaxy",
-   "One of the major galaxies in the Antennae system.",
-   [-1850,700,920],
-   65,
-   "irregular"],
-
-  ["NGC 4039",
-   "Interacting Galaxy",
-   "The second major galaxy in the Antennae system.",
-   [-1780,735,960],
-   62,
-   "irregular"],
-
-  ["NGC 6744",
-   "Spiral Galaxy",
-   "A large nearby spiral galaxy.",
-   [1800,920,160],
-   125,
-   "spiral"],
-
-  ["NGC 4258",
-   "Spiral Galaxy",
-   "A nearby spiral galaxy known for its warped disk.",
-   [-1600,-850,-430],
-   96,
-   "spiral"]
-
-];
-
-
-/* ============================================================
-   GALAXY CREATION
-============================================================ */
-
-const galaxyObjects = [];
-
-
-function createGalaxy(
-  data
-) {
-
-  const [
-    name,
-    type,
-    description,
-    position,
-    radius,
-    style
-  ] = data;
-
-
-  const group =
-    new THREE.Group();
-
-  group.position.set(
-    ...position
-  );
-
-
-  group.rotation.z =
-    random(
-      0,
-      Math.PI * 2
-    );
-
-
-  group.rotation.x =
-    random(
-      -.7,
-      .7
-    );
-
-
-  /*
-    REUSED texture.
-    This is the major startup optimization.
-  */
-
-  const texture =
-    createGalaxyTexture(
-      style
-    );
-
-
-  const sprite =
-    new THREE.Sprite(
-
-      new THREE.SpriteMaterial({
-
-        map:
-          texture,
-
-        transparent:
-          true,
-
-        opacity:
-          .94,
-
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      })
-
-    );
-
-
-  sprite.scale.set(
-    radius * 2.25,
-    radius * 2.25,
-    1
-  );
-
-
-  group.add(
-    sprite
-  );
-
-
-  /*
-    Small 3D star cloud.
-    Kept intentionally lightweight.
-  */
-
-  const count =
-    isMobile
-      ? 45
-      : 90;
-
-  const positions =
-    new Float32Array(
-      count * 3
-    );
-
-
-  for (
-    let i = 0;
-    i < count;
-    i++
-  ) {
-
-    const a =
-      random(
-        0,
-        Math.PI * 2
-      );
-
-    const r =
-      radius *
-      Math.pow(
-        Math.random(),
-        .6
-      );
-
-    positions[i * 3] =
-      Math.cos(a) *
-      r;
-
-    positions[i * 3 + 1] =
-      random(
-        -radius * .08,
-        radius * .08
-      );
-
-    positions[i * 3 + 2] =
-      Math.sin(a) *
-      r;
-
-  }
-
-
-  const geometry =
-    new THREE.BufferGeometry();
-
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-      positions,
-      3
-    )
-  );
-
-
-  const particles =
-    new THREE.Points(
-
-      geometry,
-
-      new THREE.PointsMaterial({
-
-        color:
-          0xcbdcff,
-
-        size:
-          isMobile
-            ? 1
-            : 1.3,
-
-        transparent:
-          true,
-
-        opacity:
-          .45,
-
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      })
-
-    );
-
-
-  group.add(
-    particles
-  );
-
-
-  /*
-    Core.
-  */
-
-  const core =
-    new THREE.Sprite(
-
-      new THREE.SpriteMaterial({
-
-        map:
-          glowTexture,
-
-        color:
-          0xffd9aa,
-
-        transparent:
-          true,
-
-        opacity:
-          .7,
-
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      })
-
-    );
-
-
-  core.scale.set(
-    radius * .65,
-    radius * .65,
-    1
-  );
-
-
-  group.add(
-    core
-  );
-
-
-  scene.add(
-    group
-  );
-
-
-  const object = {
-
-    name,
-
-    type,
-
-    description,
-
-    status:
-      "CATALOGUED",
-
-    group,
-
-    sprite,
-
-    particles,
-
-    radius
-
-  };
-
-
-  galaxyObjects.push(
-    object
-  );
-
-
-  return object;
-}
-
-
-/* ============================================================
-   PROGRESSIVE GALAXY LOADING
-============================================================ */
-
-let galaxyIndex =
-  0;
-
-
-function loadGalaxiesProgressively() {
-
-  const start =
-    performance.now();
-
-
-  /*
-    Add only a few per frame.
-  */
-
-  while (
-    galaxyIndex <
-      GALAXIES.length &&
-
-    performance.now() -
-      start <
-      7
-  ) {
-
-    createGalaxy(
-      GALAXIES[
-        galaxyIndex
-      ]
-    );
-
-    galaxyIndex++;
-
-  }
-
-
-  if (
-    galaxyIndex <
-      GALAXIES.length
-  ) {
-
-    requestAnimationFrame(
-      loadGalaxiesProgressively
-    );
-
-  } else {
-
-    loadDeepField();
-
-  }
-}
-
-
-/*
-  Start galaxy loading AFTER
-  the first render has happened.
-*/
-
-requestAnimationFrame(
-  () => {
-
-    requestAnimationFrame(
-      loadGalaxiesProgressively
-    );
-
-  }
-);
-
-
-/* ============================================================
-   DEEP FIELD
-============================================================ */
-
-let deepFieldStarted =
-  false;
-
-let deepCount =
-  0;
-
-const deepGroup =
-  new THREE.Group();
-
-scene.add(
-  deepGroup
-);
-
-
-function createDeepGalaxy() {
-
-  const direction =
-    new THREE.Vector3(
-      random(-1,1),
-      random(-1,1),
-      random(-1,1)
-    ).normalize();
-
-
-  const distance =
-    random(
-      4500,
-      18000
-    );
-
-
-  const position =
-    direction.multiplyScalar(
-      distance
-    );
-
-
-  const size =
-    random(
-      12,
-      42
-    );
-
-
-  const styles = [
-    "spiral",
-    "barred",
-    "elliptical",
-    "irregular"
-  ];
-
-
-  const style =
-    styles[
-      Math.floor(
-        Math.random() *
-        styles.length
-      )
-    ];
-
-
-  const sprite =
-    new THREE.Sprite(
-
-      new THREE.SpriteMaterial({
-
-        map:
-          createGalaxyTexture(
-            style
-          ),
-
-        transparent:
-          true,
-
-        opacity:
-          random(
-            .35,
-            .7
-          ),
-
-        depthWrite:
-          false,
-
-        blending:
-          THREE.AdditiveBlending
-
-      })
-
-    );
-
-
-  sprite.position.copy(
-    position
-  );
-
-
-  sprite.scale.set(
-    size * 2,
-    size * 2,
-    1
-  );
-
-
-  deepGroup.add(
-    sprite
-  );
-}
-
-
-function loadDeepField() {
-
-  if (
-    deepFieldStarted
-  ) {
-    return;
-  }
-
-  deepFieldStarted =
-    true;
-
-
-  const target =
-    isMobile
-      ? 100
-      : 220;
-
-
-  function batch() {
-
-    const end =
-      Math.min(
-        deepCount + 10,
-        target
-      );
-
-
-    while (
-      deepCount <
-      end
-    ) {
-
-      createDeepGalaxy();
-
-      deepCount++;
-
-    }
-
-
-    if (
-      deepCount <
-      target
-    ) {
-
-      requestAnimationFrame(
-        batch
-      );
-
-    }
-
-  }
-
-
-  requestAnimationFrame(
-    batch
-  );
-}
-
-
-/* ============================================================
-   SOLAR SYSTEM
-============================================================ */
-
-const solarSystem =
-  new THREE.Group();
-
-scene.add(
-  solarSystem
-);
-
-
-/* ============================================================
-   SUN
-============================================================ */
-
-const sun =
-  new THREE.Mesh(
-
-    new THREE.SphereGeometry(
-      10,
-      32,
-      32
-    ),
-
-    new THREE.MeshBasicMaterial({
-      color:
-        0xffd267
-    })
-
-  );
-
-
-solarSystem.add(
-  sun
-);
-
-
-const sunGlow =
-  new THREE.Sprite(
-
-    new THREE.SpriteMaterial({
-
-      map:
-        glowTexture,
-
-      color:
-        0xffa927,
-
-      transparent:
-        true,
-
-      opacity:
-        .85,
-
-      depthWrite:
-        false,
-
-      blending:
-        THREE.AdditiveBlending
-
-    })
-
-  );
-
-
-sunGlow.scale.set(
-  70,
-  70,
-  1
-);
-
-
-solarSystem.add(
-  sunGlow
-);
-
-
-/* ============================================================
-   PLANETS
-============================================================ */
-
-const PLANETS = [
-
-  {
-    name: "Mercury",
-    radius: 1.3,
-    distance: 18,
-    period: 87.969,
-    color: 0x9c9288
-  },
-
-  {
-    name: "Venus",
-    radius: 2,
-    distance: 27,
-    period: 224.701,
-    color: 0xd6b477
-  },
-
-  {
-    name: "Earth",
-    radius: 2.2,
-    distance: 38,
-    period: 365.256,
-    color: 0x3980ce
-  },
-
-  {
-    name: "Mars",
-    radius: 1.7,
-    distance: 50,
-    period: 686.98,
-    color: 0xb75e45
-  },
-
-  {
-    name: "Jupiter",
-    radius: 6.5,
-    distance: 78,
-    period: 4332.59,
-    color: 0xd0aa80
-  },
-
-  {
-    name: "Saturn",
-    radius: 5.7,
-    distance: 108,
-    period: 10759.22,
-    color: 0xd8c28d,
-    rings: true
-  },
-
-  {
-    name: "Uranus",
-    radius: 4,
-    distance: 137,
-    period: 30688.5,
-    color: 0x8acfd5
-  },
-
-  {
-    name: "Neptune",
-    radius: 3.9,
-    distance: 166,
-    period: 60182,
-    color: 0x416ac6
-  }
-
-];
-
-
-const planetObjects = [];
-
-
-/* ============================================================
-   ORBIT
-============================================================ */
-
-function createOrbit(
-  radius
-) {
-
-  const points = [];
-
-  for (
-    let i = 0;
-    i <= 96;
-    i++
-  ) {
+  for (let i = 0; i < 700; i++) {
 
     const angle =
-      i /
-      96 *
-      Math.PI *
-      2;
-
-    points.push(
-
-      new THREE.Vector3(
-
-        Math.cos(angle) *
-          radius,
-
-        0,
-
-        Math.sin(angle) *
-          radius
-
-      )
-
-    );
-
-  }
-
-
-  const geometry =
-    new THREE.BufferGeometry()
-      .setFromPoints(
-        points
-      );
-
-
-  const material =
-    new THREE.LineBasicMaterial({
-
-      color:
-        0x58677f,
-
-      transparent:
-        true,
-
-      opacity:
-        .2
-
-    });
-
-
-  return new THREE.Line(
-    geometry,
-    material
-  );
-}
-
-
-/* ============================================================
-   CREATE PLANETS
-============================================================ */
-
-PLANETS.forEach(
-  (
-    planet,
-    index
-  ) => {
-
-    solarSystem.add(
-      createOrbit(
-        planet.distance
-      )
-    );
-
-
-    const mesh =
-      new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-          planet.radius,
-          24,
-          24
-        ),
-
-        new THREE.MeshStandardMaterial({
-
-          color:
-            planet.color,
-
-          roughness:
-            .85,
-
-          metalness:
-            .02
-
-        })
-
-      );
-
-
-    solarSystem.add(
-      mesh
-    );
-
-
-    if (
-      planet.rings
-    ) {
-
-      const ring =
-        new THREE.Mesh(
-
-          new THREE.RingGeometry(
-            planet.radius * 1.3,
-            planet.radius * 2.15,
-            64
-          ),
-
-          new THREE.MeshBasicMaterial({
-
-            color:
-              0xc5b17f,
-
-            transparent:
-              true,
-
-            opacity:
-              .65,
-
-            side:
-              THREE.DoubleSide
-
-          })
-
-        );
-
-
-      ring.rotation.x =
-        Math.PI / 2;
-
-
-      mesh.add(
-        ring
-      );
-
-    }
-
-
-    if (
-      planet.name ===
-      "Earth"
-    ) {
-
-      const atmosphere =
-        new THREE.Mesh(
-
-          new THREE.SphereGeometry(
-            planet.radius * 1.08,
-            20,
-            20
-          ),
-
-          new THREE.MeshBasicMaterial({
-
-            color:
-              0x4da4ff,
-
-            transparent:
-              true,
-
-            opacity:
-              .12,
-
-            side:
-              THREE.BackSide,
-
-            blending:
-              THREE.AdditiveBlending
-
-          })
-
-        );
-
-
-      mesh.add(
-        atmosphere
-      );
-
-    }
-
-
-    planetObjects.push({
-
-      ...planet,
-
-      mesh,
-
-      index
-
-    });
-
-  }
-);
-
-
-/* ============================================================
-   ASTEROIDS
-============================================================ */
-
-function createAsteroids() {
-
-  const count =
-    isMobile
-      ? 1000
-      : 2400;
-
-
-  const positions =
-    new Float32Array(
-      count * 3
-    );
-
-
-  for (
-    let i = 0;
-    i < count;
-    i++
-  ) {
-
-    const angle =
-      random(
-        0,
-        Math.PI * 2
-      );
-
+      Math.random() * Math.PI * 2;
 
     const radius =
-      random(
-        59,
-        70
-      );
+      Math.pow(Math.random(), .65) *
+      size * .43;
 
+    const x =
+      cx + Math.cos(angle) * radius;
 
-    positions[i * 3] =
-      Math.cos(angle) *
-      radius;
+    const y =
+      cy + Math.sin(angle) *
+      radius * .42;
 
-    positions[i * 3 + 1] =
-      random(-2,2);
+    ctx.fillStyle =
+      `rgba(255,255,255,${Math.random() * .55})`;
 
-    positions[i * 3 + 2] =
-      Math.sin(angle) *
-      radius;
-
+    ctx.fillRect(
+      x,
+      y,
+      1,
+      1
+    );
   }
 
-
-  const geometry =
-    new THREE.BufferGeometry();
-
-
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-      positions,
-      3
-    )
-  );
-
-
-  const material =
-    new THREE.PointsMaterial({
-
-      color:
-        0xa29380,
-
-      size:
-        .3,
-
-      transparent:
-        true,
-
-      opacity:
-        .5,
-
-      depthWrite:
-        false
-
-    });
-
-
-  solarSystem.add(
-
-    new THREE.Points(
-      geometry,
-      material
-    )
-
-  );
-
+  return new THREE.CanvasTexture(c);
 }
 
+let galaxyTexture;
 
-createAsteroids();
+function createGalaxy(data) {
 
+  if (!galaxyTexture) {
+    galaxyTexture =
+      createGalaxyTexture();
+  }
 
-/* ============================================================
-   LIGHT
-============================================================ */
+  const [name, x, y, z] =
+    data;
 
-scene.add(
-  new THREE.AmbientLight(
-    0x7b8da5,
-    .18
-  )
-);
+  const material =
+    new THREE.SpriteMaterial({
+      map: galaxyTexture,
+      transparent: true,
+      opacity: .9,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
 
+  const sprite =
+    new THREE.Sprite(material);
 
-const sunLight =
-  new THREE.PointLight(
-    0xffffff,
-    3,
-    700
+  const size =
+    name === "Milky Way"
+      ? 70
+      : 20 + Math.random() * 25;
+
+  sprite.scale.set(
+    size,
+    size * .62,
+    1
   );
 
-
-solarSystem.add(
-  sunLight
-);
-
-
-/* ============================================================
-   TIME ENGINE
-============================================================ */
-
-const J2000 =
-  Date.UTC(
-    2000,
-    0,
-    1,
-    12
+  sprite.position.set(
+    x,
+    y,
+    z
   );
 
+  sprite.userData = {
+    name,
+    type: "GALAXY"
+  };
+
+  scene.add(sprite);
+
+  addObject({
+    name,
+    type: "GALAXY",
+    object: sprite,
+    description:
+      "Catalogue galaxy represented in the COSMOS deep-space layer."
+  });
+}
+
+/* =========================================================
+   PROGRESSIVE GALAXY LOADING
+   ========================================================= */
+
+let galaxyIndex = 0;
+
+function loadGalaxyBatch() {
+
+  if (galaxyIndex >= galaxies.length)
+    return;
+
+  createGalaxy(
+    galaxies[galaxyIndex]
+  );
+
+  galaxyIndex++;
+
+  requestAnimationFrame(
+    loadGalaxyBatch
+  );
+}
+
+setTimeout(
+  loadGalaxyBatch,
+  900
+);
+
+/* =========================================================
+   PLANET POSITION ENGINE
+   ========================================================= */
 
 let selectedDate =
   new Date();
 
-
-let presentMode =
-  true;
-
-
-function daysFromJ2000(
-  date
-) {
+function daysSinceJ2000(date) {
 
   return (
     date.getTime() -
-    J2000
-  ) /
-  86400000;
-
+    Date.UTC(
+      2000,
+      0,
+      1,
+      12
+    )
+  ) / 86400000;
 }
 
-
-function updatePlanets() {
+function updatePlanetPositions() {
 
   const days =
-    daysFromJ2000(
+    daysSinceJ2000(
       selectedDate
     );
 
+  for (const item of planetMeshes) {
 
-  planetObjects.forEach(
-    planet => {
+    const p = item.data;
 
-      const angle =
+    const angle =
+      (
         days /
-        planet.period *
-        Math.PI *
-        2
-        +
-        planet.index *
-        .72;
+        p.period
+      ) *
+      Math.PI *
+      2;
 
+    item.mesh.position.x =
+      Math.cos(angle) *
+      p.distance;
 
-      planet.mesh.position.x =
-        Math.cos(angle) *
-        planet.distance;
+    item.mesh.position.z =
+      Math.sin(angle) *
+      p.distance;
 
+    item.mesh.position.y =
+      Math.sin(angle * .37) *
+      p.distance *
+      .015;
 
-      planet.mesh.position.z =
-        Math.sin(angle) *
-        planet.distance;
-
-    }
-  );
+    item.mesh.rotation.y +=
+      .002;
+  }
 }
 
+/* =========================================================
+   TIME UI
+   ========================================================= */
 
-/* ============================================================
-   SCALE
-============================================================ */
-
-const slider =
+const dateInput =
   document.getElementById(
-    "scaleSlider"
+    "dateInput"
   );
 
-const scaleText =
+const timeReadout =
   document.getElementById(
-    "scaleText"
+    "timeReadout"
   );
 
+function formatDate(date) {
 
-const SCALE_NAMES = [
-
-  "DEEP UNIVERSE",
-
-  "GALAXY FIELD",
-
-  "LOCAL GROUP",
-
-  "MILKY WAY",
-
-  "PLANETARY SYSTEMS",
-
-  "SOLAR SYSTEM",
-
-  "EARTH",
-
-  "CONTINENT",
-
-  "CITY",
-
-  "STREET"
-
-];
-
-
-let scaleTarget =
-  4200;
-
-
-function updateScale() {
-
-  const value =
-    Number(
-      slider.value
+  return date
+    .toLocaleString(
+      undefined,
+      {
+        dateStyle: "medium",
+        timeStyle: "medium"
+      }
     );
-
-
-  const index =
-    Math.round(
-      value /
-      100 *
-      (SCALE_NAMES.length - 1)
-    );
-
-
-  scaleText.textContent =
-    SCALE_NAMES[
-      clamp(
-        index,
-        0,
-        SCALE_NAMES.length - 1
-      )
-    ];
-
-
-  const far =
-    18000;
-
-  const near =
-    .8;
-
-
-  const t =
-    value /
-    100;
-
-
-  scaleTarget =
-    Math.exp(
-
-      Math.log(far) *
-        (1 - t)
-
-      +
-
-      Math.log(near) *
-        t
-
-    );
-
 }
 
+function updateTimeUI() {
 
-slider.addEventListener(
-  "input",
-  updateScale
+  const local =
+    new Date(
+      selectedDate.getTime() -
+      selectedDate.getTimezoneOffset() *
+      60000
+    )
+      .toISOString()
+      .slice(0,16);
+
+  dateInput.value =
+    local;
+
+  timeReadout.textContent =
+    formatDate(
+      selectedDate
+    );
+
+  updatePlanetPositions();
+}
+
+dateInput.addEventListener(
+  "change",
+  () => {
+
+    selectedDate =
+      new Date(
+        dateInput.value
+      );
+
+    updateTimeUI();
+  }
 );
 
+document
+  .getElementById("presentBtn")
+  .onclick = () => {
 
-/* ============================================================
+    selectedDate =
+      new Date();
+
+    updateTimeUI();
+  };
+
+document
+  .getElementById("nowBtn")
+  .onclick = () => {
+
+    selectedDate =
+      new Date();
+
+    updateTimeUI();
+  };
+
+document
+  .getElementById("pastBtn")
+  .onclick = () => {
+
+    selectedDate =
+      new Date(
+        selectedDate.getTime() -
+        365.25 *
+        86400000
+      );
+
+    updateTimeUI();
+  };
+
+document
+  .getElementById("futureBtn")
+  .onclick = () => {
+
+    selectedDate =
+      new Date(
+        selectedDate.getTime() +
+        365.25 *
+        86400000
+      );
+
+    updateTimeUI();
+  };
+
+updateTimeUI();
+
+/* =========================================================
    SEARCH
-============================================================ */
+   ========================================================= */
 
 const searchPanel =
   document.getElementById(
@@ -2118,245 +795,97 @@ const searchResults =
     "searchResults"
   );
 
-
 document
-  .getElementById(
-    "searchBtn"
-  )
-  .addEventListener(
-    "click",
-    () => {
+  .getElementById("searchBtn")
+  .onclick = () => {
 
-      searchPanel.classList.toggle(
-        "hidden"
-      );
+    searchPanel.classList.toggle(
+      "hidden"
+    );
 
-      if (
-        !searchPanel.classList.contains(
-          "hidden"
-        )
-      ) {
-
-        setTimeout(
-          () =>
-            searchInput.focus(),
-          80
-        );
-
-      }
-
+    if (!searchPanel.classList.contains("hidden")) {
+      searchInput.focus();
     }
-  );
-
-
-function performSearch() {
-
-  const query =
-    searchInput.value
-      .trim()
-      .toLowerCase();
-
-
-  searchResults.innerHTML =
-    "";
-
-
-  if (!query) {
-    return;
-  }
-
-
-  const results =
-    galaxyObjects.filter(
-      object =>
-
-        object.name
-          .toLowerCase()
-          .includes(query)
-
-        ||
-
-        object.type
-          .toLowerCase()
-          .includes(query)
-
-    );
-
-
-  if (
-    !results.length
-  ) {
-
-    searchResults.innerHTML =
-      `
-      <div class="search-result">
-
-        <div class="result-name">
-          No matching object
-        </div>
-
-        <div class="result-type">
-          TRY ANOTHER SEARCH
-        </div>
-
-      </div>
-      `;
-
-    return;
-  }
-
-
-  results
-    .slice(0,15)
-    .forEach(
-      object => {
-
-        const row =
-          document.createElement(
-            "div"
-          );
-
-
-        row.className =
-          "search-result";
-
-
-        row.innerHTML =
-          `
-          <div class="result-name">
-            ${object.name}
-          </div>
-
-          <div class="result-type">
-            ${object.type}
-          </div>
-          `;
-
-
-        row.onclick =
-          () => {
-
-            showObject(
-              object
-            );
-
-            searchPanel.classList.add(
-              "hidden"
-            );
-
-          };
-
-
-        searchResults.appendChild(
-          row
-        );
-
-      }
-    );
-}
-
-
-document
-  .getElementById(
-    "searchGo"
-  )
-  .addEventListener(
-    "click",
-    performSearch
-  );
-
+  };
 
 searchInput.addEventListener(
-  "keydown",
-  event => {
+  "input",
+  () => {
 
-    if (
-      event.key ===
-      "Enter"
-    ) {
+    const query =
+      searchInput.value
+        .trim()
+        .toLowerCase();
 
-      performSearch();
+    searchResults.innerHTML = "";
 
+    if (!query)
+      return;
+
+    const matches =
+      objects
+        .filter(
+          o =>
+            o.name
+              .toLowerCase()
+              .includes(query)
+        )
+        .slice(0, 12);
+
+    for (const item of matches) {
+
+      const div =
+        document.createElement("div");
+
+      div.className =
+        "result";
+
+      div.innerHTML = `
+        <div class="result-name">
+          ${item.name}
+        </div>
+        <div class="result-type">
+          ${item.type}
+        </div>
+      `;
+
+      div.onclick = () => {
+
+        focusObject(
+          item.object
+        );
+
+        showInfo(
+          item
+        );
+
+        searchPanel.classList.add(
+          "hidden"
+        );
+      };
+
+      searchResults.appendChild(
+        div
+      );
     }
+  });
 
-  }
-);
+/* =========================================================
+   OBJECT FOCUS
+   ========================================================= */
 
-
-/* ============================================================
-   OBJECT PANEL
-============================================================ */
-
-const objectPanel =
-  document.getElementById(
-    "objectPanel"
-  );
-
-
-function showObject(
-  object
-) {
-
-  document
-    .getElementById(
-      "objectName"
-    )
-    .textContent =
-      object.name;
-
-
-  document
-    .getElementById(
-      "objectDescription"
-    )
-    .textContent =
-      object.description;
-
-
-  document
-    .getElementById(
-      "objectType"
-    )
-    .textContent =
-      object.type;
-
-
-  document
-    .getElementById(
-      "objectStatus"
-    )
-    .textContent =
-      object.status;
-
-
-  objectPanel.classList.remove(
-    "hidden"
-  );
-
-
-  focusObject(
-    object.group
-  );
-}
-
-
-function focusObject(
-  object
-) {
+function focusObject(object) {
 
   const position =
     new THREE.Vector3();
-
 
   object.getWorldPosition(
     position
   );
 
-
   controls.target.copy(
     position
   );
-
 
   const direction =
     camera.position
@@ -2364,564 +893,272 @@ function focusObject(
       .sub(position)
       .normalize();
 
-
   camera.position.copy(
-
-    position.clone().add(
-
-      direction.multiplyScalar(
-        300
+    position
+      .clone()
+      .add(
+        direction.multiplyScalar(
+          Math.max(
+            object.scale.x * 4,
+            8
+          )
+        )
       )
-
-    )
-
   );
 
+  controls.update();
 }
 
+function showInfo(item) {
+
+  const panel =
+    document.getElementById(
+      "infoPanel"
+    );
+
+  const content =
+    document.getElementById(
+      "infoContent"
+    );
+
+  content.innerHTML = `
+    <div class="info-title">
+      ${item.name}
+    </div>
+
+    <div class="info-type">
+      ${item.type}
+    </div>
+
+    <div class="info-line">
+      ${item.description ||
+        "COSMOS astronomical object."}
+    </div>
+  `;
+
+  panel.classList.remove(
+    "hidden"
+  );
+}
 
 document
-  .getElementById(
-    "closeObject"
-  )
-  .addEventListener(
-    "click",
-    () => {
+  .getElementById("closeInfo")
+  .onclick = () => {
 
-      objectPanel.classList.add(
+    document
+      .getElementById(
+        "infoPanel"
+      )
+      .classList.add(
         "hidden"
       );
+  };
 
+/* =========================================================
+   SCALE BUTTONS
+   ========================================================= */
+
+document
+  .querySelectorAll(
+    "[data-scale]"
+  )
+  .forEach(
+    button => {
+
+      button.onclick = () => {
+
+        const scale =
+          button.dataset.scale;
+
+        if (scale === "system") {
+
+          camera.position.set(
+            0,
+            18,
+            45
+          );
+
+          controls.target.set(
+            0,
+            0,
+            0
+          );
+        }
+
+        if (scale === "galaxy") {
+
+          camera.position.set(
+            0,
+            150,
+            350
+          );
+
+          controls.target.set(
+            0,
+            0,
+            0
+          );
+        }
+
+        if (scale === "universe") {
+
+          camera.position.set(
+            0,
+            900,
+            1800
+          );
+
+          controls.target.set(
+            0,
+            0,
+            0
+          );
+        }
+
+        controls.update();
+      };
     }
   );
 
-
-/* ============================================================
-   GALAXY CLICK
-============================================================ */
+/* =========================================================
+   CLICK OBJECTS
+   ========================================================= */
 
 const raycaster =
   new THREE.Raycaster();
 
-
 const pointer =
   new THREE.Vector2();
 
-
-let pointerX =
-  0;
-
-let pointerY =
-  0;
-
-
-renderer.domElement.addEventListener(
-  "pointerdown",
-  event => {
-
-    pointerX =
-      event.clientX;
-
-    pointerY =
-      event.clientY;
-
-  }
-);
-
-
-renderer.domElement.addEventListener(
-  "pointerup",
-  event => {
-
-    const movement =
-      Math.hypot(
-        event.clientX -
-          pointerX,
-
-        event.clientY -
-          pointerY
-      );
-
-
-    if (
-      movement > 8
-    ) {
-      return;
-    }
-
-
-    const rect =
-      renderer.domElement
-        .getBoundingClientRect();
-
-
-    pointer.x =
-      (
-        event.clientX -
-        rect.left
-      ) /
-      rect.width *
-      2 -
-      1;
-
-
-    pointer.y =
-      -(
-        (
-          event.clientY -
-          rect.top
-        ) /
-        rect.height
-      ) *
-      2 +
-      1;
-
-
-    raycaster.setFromCamera(
-      pointer,
-      camera
-    );
-
-
-    const hit =
-      raycaster.intersectObjects(
-        galaxyObjects.map(
-          g => g.sprite
-        ),
-        false
-      );
-
-
-    if (
-      !hit.length
-    ) {
-      return;
-    }
-
-
-    const selected =
-      galaxyObjects.find(
-        g =>
-          g.sprite ===
-          hit[0].object
-      );
-
-
-    if (
-      selected
-    ) {
-
-      showObject(
-        selected
-      );
-
-    }
-
-  }
-);
-
-
-/* ============================================================
-   DATE
-============================================================ */
-
-const timeDisplay =
-  document.getElementById(
-    "timeDisplay"
-  );
-
-const dateInput =
-  document.getElementById(
-    "dateInput"
-  );
-
-
-function formatDate(
-  date
+function pointerSelect(
+  event
 ) {
 
-  return date.toLocaleString(
-    undefined,
-    {
+  const rect =
+    canvas.getBoundingClientRect();
 
-      year:
-        "numeric",
+  pointer.x =
+    ((event.clientX - rect.left) /
+      rect.width) *
+    2 - 1;
 
-      month:
-        "numeric",
+  pointer.y =
+    -((event.clientY - rect.top) /
+      rect.height) *
+    2 + 1;
 
-      day:
-        "numeric",
-
-      hour:
-        "numeric",
-
-      minute:
-        "2-digit",
-
-      second:
-        "2-digit"
-
-    }
+  raycaster.setFromCamera(
+    pointer,
+    camera
   );
 
-}
-
-
-function inputDate(
-  date
-) {
-
-  const pad =
-    n =>
-      String(n)
-        .padStart(
-          2,
-          "0"
-        );
-
-
-  return (
-    `${date.getFullYear()}-` +
-    `${pad(
-      date.getMonth() + 1
-    )}-` +
-    `${pad(
-      date.getDate()
-    )}T` +
-    `${pad(
-      date.getHours()
-    )}:` +
-    `${pad(
-      date.getMinutes()
-    )}`
-  );
-
-}
-
-
-function updateDateUI() {
-
-  timeDisplay.textContent =
-    formatDate(
-      selectedDate
+  const hits =
+    raycaster.intersectObjects(
+      scene.children,
+      true
     );
 
+  if (!hits.length)
+    return;
 
-  dateInput.value =
-    inputDate(
-      selectedDate
-    );
+  let selected =
+    hits[0].object;
 
-}
-
-
-dateInput.addEventListener(
-  "change",
-  () => {
-
-    if (
-      !dateInput.value
-    ) {
-      return;
-    }
-
-
-    selectedDate =
-      new Date(
-        dateInput.value
-      );
-
-
-    presentMode =
-      false;
-
-
-    updateDateUI();
-
-    updatePlanets();
-
+  while (
+    selected &&
+    !selected.userData?.name &&
+    selected.parent
+  ) {
+    selected =
+      selected.parent;
   }
-);
-
-
-/* ============================================================
-   DAY BUTTONS
-============================================================ */
-
-function changeDay(
-  days
-) {
-
-  selectedDate =
-    new Date(
-      selectedDate.getTime() +
-      days *
-      86400000
-    );
-
-
-  presentMode =
-    false;
-
-
-  updateDateUI();
-
-  updatePlanets();
-
-}
-
-
-document
-  .getElementById(
-    "previousDay"
-  )
-  .onclick =
-    () =>
-      changeDay(-1);
-
-
-document
-  .getElementById(
-    "nextDay"
-  )
-  .onclick =
-    () =>
-      changeDay(1);
-
-
-/* ============================================================
-   PRESENT
-============================================================ */
-
-document
-  .getElementById(
-    "presentBtn"
-  )
-  .onclick =
-    () => {
-
-      presentMode =
-        true;
-
-      selectedDate =
-        new Date();
-
-      updateDateUI();
-
-      updatePlanets();
-
-    };
-
-
-/* ============================================================
-   CAMERA SCALE
-============================================================ */
-
-function updateCameraScale() {
-
-  const current =
-    camera.position.distanceTo(
-      controls.target
-    );
-
-
-  const next =
-    THREE.MathUtils.lerp(
-      current,
-      scaleTarget,
-      .06
-    );
-
 
   if (
-    Math.abs(
-      next - current
-    ) <
-    .01
+    selected?.userData?.name
   ) {
-    return;
+
+    const found =
+      objects.find(
+        o =>
+          o.object === selected
+      );
+
+    if (found) {
+      showInfo(found);
+    }
   }
-
-
-  const direction =
-    camera.position
-      .clone()
-      .sub(
-        controls.target
-      )
-      .normalize();
-
-
-  camera.position.copy(
-
-    controls.target
-      .clone()
-      .add(
-
-        direction.multiplyScalar(
-          next
-        )
-
-      )
-
-  );
-
 }
 
+canvas.addEventListener(
+  "click",
+  pointerSelect
+);
 
-/* ============================================================
+/* =========================================================
    RESIZE
-============================================================ */
+   ========================================================= */
 
-window.addEventListener(
+addEventListener(
   "resize",
   () => {
 
     camera.aspect =
-      window.innerWidth /
-      window.innerHeight;
-
+      innerWidth /
+      innerHeight;
 
     camera.updateProjectionMatrix();
 
-
     renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
+      innerWidth,
+      innerHeight,
+      false
     );
 
+    renderer.setPixelRatio(
+      innerWidth < 700
+        ? 1
+        : Math.min(
+            devicePixelRatio,
+            1.25
+          )
+    );
   }
 );
 
+/* =========================================================
+   RENDER LOOP
+   ========================================================= */
 
-/* ============================================================
-   ANIMATION
-============================================================ */
-
-let lastPresentUpdate =
-  0;
-
-
-function animate(
-  time
-) {
+function animate() {
 
   requestAnimationFrame(
     animate
   );
 
-
-  /*
-    Present mode updates the
-    astronomical clock.
-  */
-
-  if (
-    presentMode &&
-    time -
-      lastPresentUpdate >
-      500
-  ) {
-
-    selectedDate =
-      new Date();
-
-    updateDateUI();
-
-    updatePlanets();
-
-    lastPresentUpdate =
-      time;
-
-  }
-
-
-  /*
-    Very slow presentation movement.
-  */
-
-  stars.rotation.y +=
-    .0000015;
-
-
-  solarSystem.rotation.y +=
-    .00001;
-
-
-  /*
-    Galaxy movement is intentionally
-    extremely slow. It is visual
-    presentation, not real-time
-    galactic motion.
-  */
-
-  for (
-    const galaxy of
-    galaxyObjects
-  ) {
-
-    galaxy.group.rotation.y +=
-      .0000004;
-
-  }
-
-
-  updateCameraScale();
+  const elapsed =
+    clock.getElapsedTime();
 
   controls.update();
+
+  sun.scale.setScalar(
+    1 +
+    Math.sin(elapsed * 2) *
+    .015
+  );
 
   renderer.render(
     scene,
     camera
   );
-
 }
 
+animate();
 
-/* ============================================================
-   INITIALIZE
-============================================================ */
+/* =========================================================
+   READY
+   ========================================================= */
 
-selectedDate =
-  new Date();
-
-updateDateUI();
-
-updatePlanets();
-
-slider.value =
-  0;
-
-updateScale();
-
-
-/*
-  CRITICAL DIFFERENCE:
-
-  Start rendering immediately.
-*/
-
-animate(0);
-
-
-/*
-  Hide loading screen after
-  the FIRST rendered frame.
-
-  It does not wait for galaxies.
-*/
-
-requestAnimationFrame(
-  () => {
-
-    document
-      .getElementById(
-        "loading"
-      )
-      .classList.add(
-        "hide"
-      );
-
-  }
-);
+document.getElementById(
+  "statusText"
+).textContent =
+  "COSMOS READY — 3D ENGINE ONLINE";
