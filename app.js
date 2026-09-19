@@ -1,1164 +1,584 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-/* =========================================================
-   COSMOS 1.0
-   Fast-start 3D universe explorer
-   ========================================================= */
-
 const canvas = document.getElementById("space");
 
-const scene = new THREE.Scene();
-
-scene.background = new THREE.Color(0x010207);
-
-const camera = new THREE.PerspectiveCamera(
-  55,
-  innerWidth / innerHeight,
-  0.01,
-  100000
-);
-
-camera.position.set(0, 18, 45);
+/* =========================
+   RENDERER
+========================= */
 
 const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: innerWidth > 700,
-  powerPreference: "high-performance"
+    canvas,
+    antialias: true,
+    alpha: false,
+    powerPreference: "high-performance"
 });
 
-renderer.setSize(innerWidth, innerHeight, false);
-
 renderer.setPixelRatio(
-  innerWidth < 700 ? 1 : Math.min(devicePixelRatio, 1.25)
+    Math.min(window.devicePixelRatio || 1, 1.5)
 );
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight,
+    false
+);
+
+renderer.setClearColor(0x01030a, 1);
 
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
+
+/* =========================
+   SCENE
+========================= */
+
+const scene = new THREE.Scene();
+
+scene.background =
+    new THREE.Color(0x01030a);
+
+
+/* =========================
+   CAMERA
+========================= */
+
+const camera = new THREE.PerspectiveCamera(
+    55,
+    window.innerWidth / window.innerHeight,
+    0.01,
+    10000
+);
+
+camera.position.set(
+    0,
+    12,
+    30
+);
+
+
+/* =========================
+   CONTROLS
+========================= */
+
 const controls = new OrbitControls(
-  camera,
-  renderer.domElement
+    camera,
+    renderer.domElement
 );
 
 controls.enableDamping = true;
-controls.dampingFactor = 0.055;
+controls.dampingFactor = 0.06;
+
+controls.enableZoom = true;
+controls.enablePan = true;
 
 controls.minDistance = 2;
-controls.maxDistance = 50000;
-
-controls.enablePan = true;
+controls.maxDistance = 5000;
 
 controls.target.set(0, 0, 0);
 
-const clock = new THREE.Clock();
 
-/* =========================================================
-   DATA
-   ========================================================= */
+/* =========================
+   LIGHT
+========================= */
 
-const objects = [];
+const ambient =
+    new THREE.AmbientLight(
+        0xffffff,
+        1.5
+    );
 
-const planets = [
-  {
-    name: "Mercury",
-    radius: .38,
-    distance: 5,
-    color: 0x999999,
-    period: 87.97,
-    type: "PLANET"
-  },
-  {
-    name: "Venus",
-    radius: .72,
-    distance: 7,
-    color: 0xd8a95b,
-    period: 224.7,
-    type: "PLANET"
-  },
-  {
-    name: "Earth",
-    radius: .82,
-    distance: 9.5,
-    color: 0x3f83ff,
-    period: 365.25,
-    type: "PLANET"
-  },
-  {
-    name: "Mars",
-    radius: .58,
-    distance: 12,
-    color: 0xd75d38,
-    period: 686.98,
-    type: "PLANET"
-  },
-  {
-    name: "Jupiter",
-    radius: 2.7,
-    distance: 18,
-    color: 0xc99a72,
-    period: 4332.6,
-    type: "PLANET"
-  },
-  {
-    name: "Saturn",
-    radius: 2.25,
-    distance: 25,
-    color: 0xd8c08b,
-    period: 10759,
-    type: "PLANET"
-  },
-  {
-    name: "Uranus",
-    radius: 1.45,
-    distance: 32,
-    color: 0x77cfe0,
-    period: 30687,
-    type: "PLANET"
-  },
-  {
-    name: "Neptune",
-    radius: 1.4,
-    distance: 39,
-    color: 0x416be8,
-    period: 60190,
-    type: "PLANET"
-  }
-];
+scene.add(ambient);
 
-const galaxies = [
-  ["Milky Way", 0, 0, 0],
-  ["Andromeda Galaxy", 220, 35, -90],
-  ["Triangulum Galaxy", -250, 60, 80],
-  ["Whirlpool Galaxy", 500, -100, -300],
-  ["Sombrero Galaxy", -520, 170, -160],
-  ["Pinwheel Galaxy", 620, 90, 360],
-  ["Black Eye Galaxy", -700, -120, 300],
-  ["Sunflower Galaxy", 850, 240, -420],
-  ["Cigar Galaxy", -900, 300, 500],
-  ["Cartwheel Galaxy", 1100, -250, -500],
-  ["Tadpole Galaxy", -1250, -300, -300],
-  ["Large Magellanic Cloud", 300, -500, 850],
-  ["Small Magellanic Cloud", -350, -550, 900],
-  ["Centaurus A", 1400, 450, -800],
-  ["Messier 87", -1500, 600, -650],
-  ["NGC 1300", 1700, -500, 600],
-  ["NGC 1365", -1750, 400, 700],
-  ["NGC 4414", 1900, 700, -400],
-  ["NGC 6744", -2000, -700, 400],
-  ["NGC 6946", 2150, 800, 500]
-];
+const sunLight =
+    new THREE.PointLight(
+        0xffffff,
+        3000,
+        1000
+    );
 
-/* =========================================================
-   UTILITIES
-   ========================================================= */
-
-function addObject(object) {
-  objects.push(object);
-  return object;
-}
-
-function glowTexture(size = 64) {
-
-  const c = document.createElement("canvas");
-
-  c.width = size;
-  c.height = size;
-
-  const ctx = c.getContext("2d");
-
-  const g = ctx.createRadialGradient(
-    size / 2,
-    size / 2,
+sunLight.position.set(
     0,
-    size / 2,
-    size / 2,
-    size / 2
-  );
-
-  g.addColorStop(0, "rgba(255,255,255,1)");
-  g.addColorStop(.12, "rgba(255,255,255,.95)");
-  g.addColorStop(.35, "rgba(255,255,255,.35)");
-  g.addColorStop(1, "rgba(255,255,255,0)");
-
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-
-  const texture = new THREE.CanvasTexture(c);
-
-  texture.colorSpace = THREE.SRGBColorSpace;
-
-  return texture;
-}
-
-const glow = glowTexture();
-
-/* =========================================================
-   STARS
-   ========================================================= */
-
-function createStars(count) {
-
-  const positions = new Float32Array(count * 3);
-  const sizes = new Float32Array(count);
-
-  for (let i = 0; i < count; i++) {
-
-    const r = 80 + Math.random() * 900;
-
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(2 * Math.random() - 1);
-
-    positions[i * 3] =
-      r * Math.sin(phi) * Math.cos(theta);
-
-    positions[i * 3 + 1] =
-      r * Math.cos(phi);
-
-    positions[i * 3 + 2] =
-      r * Math.sin(phi) * Math.sin(theta);
-
-    sizes[i] =
-      .5 + Math.random() * 1.7;
-  }
-
-  const geometry = new THREE.BufferGeometry();
-
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(positions, 3)
-  );
-
-  const material = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: innerWidth < 700 ? .55 : .75,
-    map: glow,
-    transparent: true,
-    opacity: .8,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
-  });
-
-  scene.add(new THREE.Points(
-    geometry,
-    material
-  ));
-}
-
-createStars(
-  innerWidth < 700 ? 2400 : 5200
-);
-
-/* =========================================================
-   SUN
-   ========================================================= */
-
-const sun = new THREE.Mesh(
-  new THREE.SphereGeometry(2.1, 32, 32),
-  new THREE.MeshBasicMaterial({
-    color: 0xffb347
-  })
-);
-
-scene.add(sun);
-
-addObject({
-  name: "Sun",
-  type: "STAR",
-  object: sun
-});
-
-const sunLight = new THREE.PointLight(
-  0xffffff,
-  1200,
-  500
+    0,
+    0
 );
 
 scene.add(sunLight);
 
-/* =========================================================
-   ORBITS
-   ========================================================= */
+
+/* =========================
+   SUN
+========================= */
+
+const sun =
+    new THREE.Mesh(
+        new THREE.SphereGeometry(
+            3,
+            32,
+            32
+        ),
+        new THREE.MeshBasicMaterial({
+            color: 0xffb52e
+        })
+    );
+
+scene.add(sun);
+
+
+/* =========================
+   STAR FIELD
+========================= */
+
+const starCount =
+    window.innerWidth < 700
+        ? 2500
+        : 6000;
+
+const starPositions =
+    new Float32Array(
+        starCount * 3
+    );
+
+for (let i = 0; i < starCount; i++) {
+
+    const radius =
+        150 +
+        Math.random() * 1500;
+
+    const theta =
+        Math.random() *
+        Math.PI * 2;
+
+    const phi =
+        Math.acos(
+            2 * Math.random() - 1
+        );
+
+    starPositions[i * 3] =
+        radius *
+        Math.sin(phi) *
+        Math.cos(theta);
+
+    starPositions[i * 3 + 1] =
+        radius *
+        Math.cos(phi);
+
+    starPositions[i * 3 + 2] =
+        radius *
+        Math.sin(phi) *
+        Math.sin(theta);
+}
+
+const starGeometry =
+    new THREE.BufferGeometry();
+
+starGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(
+        starPositions,
+        3
+    )
+);
+
+const starMaterial =
+    new THREE.PointsMaterial({
+        color: 0xffffff,
+        size:
+            window.innerWidth < 700
+                ? 1.2
+                : 1.5,
+        sizeAttenuation: true
+    });
+
+const stars =
+    new THREE.Points(
+        starGeometry,
+        starMaterial
+    );
+
+scene.add(stars);
+
+
+/* =========================
+   PLANETS
+========================= */
+
+const planetData = [
+    {
+        name: "Mercury",
+        radius: 0.35,
+        distance: 5,
+        color: 0x999999,
+        period: 88
+    },
+    {
+        name: "Venus",
+        radius: 0.65,
+        distance: 7,
+        color: 0xd49a55,
+        period: 225
+    },
+    {
+        name: "Earth",
+        radius: 0.75,
+        distance: 9,
+        color: 0x247cff,
+        period: 365
+    },
+    {
+        name: "Mars",
+        radius: 0.55,
+        distance: 11,
+        color: 0xc94b35,
+        period: 687
+    },
+    {
+        name: "Jupiter",
+        radius: 2.2,
+        distance: 16,
+        color: 0xc89a70,
+        period: 4333
+    },
+    {
+        name: "Saturn",
+        radius: 1.8,
+        distance: 23,
+        color: 0xd5bd8d,
+        period: 10759
+    },
+    {
+        name: "Uranus",
+        radius: 1.2,
+        distance: 30,
+        color: 0x72cddd,
+        period: 30687
+    },
+    {
+        name: "Neptune",
+        radius: 1.15,
+        distance: 37,
+        color: 0x4168e5,
+        period: 60190
+    }
+];
+
+const planets = [];
+
+
+/* =========================
+   ORBIT CREATOR
+========================= */
 
 function createOrbit(radius) {
 
-  const points = [];
+    const points = [];
 
-  for (let i = 0; i <= 128; i++) {
+    for (
+        let i = 0;
+        i <= 128;
+        i++
+    ) {
 
-    const a =
-      (i / 128) * Math.PI * 2;
+        const angle =
+            (i / 128) *
+            Math.PI *
+            2;
 
-    points.push(
-      new THREE.Vector3(
-        Math.cos(a) * radius,
-        0,
-        Math.sin(a) * radius
-      )
+        points.push(
+            new THREE.Vector3(
+                Math.cos(angle) * radius,
+                0,
+                Math.sin(angle) * radius
+            )
+        );
+    }
+
+    const geometry =
+        new THREE.BufferGeometry()
+            .setFromPoints(points);
+
+    const material =
+        new THREE.LineBasicMaterial({
+            color: 0x416080,
+            transparent: true,
+            opacity: 0.4
+        });
+
+    return new THREE.Line(
+        geometry,
+        material
     );
-  }
+}
 
-  const geometry =
-    new THREE.BufferGeometry()
-      .setFromPoints(points);
 
-  const material =
-    new THREE.LineBasicMaterial({
-      color: 0x426080,
-      transparent: true,
-      opacity: .24
+/* =========================
+   CREATE PLANETS
+========================= */
+
+for (const data of planetData) {
+
+    scene.add(
+        createOrbit(
+            data.distance
+        )
+    );
+
+    const planet =
+        new THREE.Mesh(
+            new THREE.SphereGeometry(
+                data.radius,
+                24,
+                24
+            ),
+            new THREE.MeshStandardMaterial({
+                color: data.color,
+                roughness: 0.8
+            })
+        );
+
+    planet.userData = data;
+
+    scene.add(planet);
+
+    planets.push({
+        mesh: planet,
+        data
     });
 
-  return new THREE.Line(
-    geometry,
-    material
-  );
+    /* Saturn ring */
+
+    if (data.name === "Saturn") {
+
+        const ring =
+            new THREE.Mesh(
+                new THREE.RingGeometry(
+                    2.5,
+                    4,
+                    64
+                ),
+                new THREE.MeshBasicMaterial({
+                    color: 0xb9a77e,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.7
+                })
+            );
+
+        ring.rotation.x =
+            Math.PI / 2;
+
+        planet.add(ring);
+    }
 }
 
-/* =========================================================
-   PLANETS
-   ========================================================= */
 
-const planetMeshes = [];
+/* =========================
+   POSITION PLANETS
+========================= */
 
-for (const p of planets) {
+function updatePlanets() {
 
-  scene.add(createOrbit(p.distance));
+    const now =
+        Date.now();
 
-  const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(
-      p.radius,
-      innerWidth < 700 ? 18 : 28,
-      innerWidth < 700 ? 18 : 28
-    ),
-    new THREE.MeshStandardMaterial({
-      color: p.color,
-      roughness: .8,
-      metalness: .05
-    })
-  );
+    const days =
+        now /
+        86400000;
 
-  mesh.userData = p;
+    for (const planet of planets) {
 
-  scene.add(mesh);
+        const data =
+            planet.data;
 
-  planetMeshes.push({
-    mesh,
-    data: p
-  });
+        const angle =
+            (days / data.period) *
+            Math.PI *
+            2;
 
-  addObject({
-    ...p,
-    object: mesh
-  });
+        planet.mesh.position.set(
+            Math.cos(angle) *
+                data.distance,
 
-  if (p.name === "Saturn") {
+            0,
 
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(
-        p.radius * 1.45,
-        p.radius * 2.35,
-        64
-      ),
-      new THREE.MeshBasicMaterial({
-        color: 0xb7a47d,
-        transparent: true,
-        opacity: .62,
-        side: THREE.DoubleSide
-      })
-    );
-
-    ring.rotation.x =
-      Math.PI / 2.15;
-
-    mesh.add(ring);
-  }
+            Math.sin(angle) *
+                data.distance
+        );
+    }
 }
 
-/* =========================================================
-   ASTEROID BELT
-   ========================================================= */
+updatePlanets();
 
-function createAsteroidBelt() {
 
-  const count =
-    innerWidth < 700 ? 500 : 1000;
+/* =========================
+   GALAXY
+========================= */
 
-  const positions =
-    new Float32Array(count * 3);
-
-  for (let i = 0; i < count; i++) {
-
-    const a =
-      Math.random() * Math.PI * 2;
-
-    const r =
-      14 + Math.random() * 2.4;
-
-    positions[i * 3] =
-      Math.cos(a) * r;
-
-    positions[i * 3 + 1] =
-      (Math.random() - .5) * .6;
-
-    positions[i * 3 + 2] =
-      Math.sin(a) * r;
-  }
-
-  const geometry =
-    new THREE.BufferGeometry();
-
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-      positions,
-      3
-    )
-  );
-
-  const material =
-    new THREE.PointsMaterial({
-      color: 0x8c806f,
-      size: .08,
-      transparent: true,
-      opacity: .6
-    });
-
-  scene.add(
-    new THREE.Points(
-      geometry,
-      material
-    )
-  );
-}
-
-setTimeout(
-  createAsteroidBelt,
-  250
-);
-
-/* =========================================================
-   GALAXIES
-   ========================================================= */
-
-function createGalaxyTexture() {
-
-  const size = 256;
-
-  const c =
-    document.createElement("canvas");
-
-  c.width = size;
-  c.height = size;
-
-  const ctx = c.getContext("2d");
-
-  const cx = size / 2;
-  const cy = size / 2;
-
-  const gradient =
-    ctx.createRadialGradient(
-      cx,
-      cy,
-      2,
-      cx,
-      cy,
-      size / 2
-    );
-
-  gradient.addColorStop(
-    0,
-    "rgba(255,255,255,1)"
-  );
-
-  gradient.addColorStop(
-    .08,
-    "rgba(255,245,210,.9)"
-  );
-
-  gradient.addColorStop(
-    .3,
-    "rgba(150,190,255,.35)"
-  );
-
-  gradient.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-  );
-
-  ctx.fillStyle = gradient;
-
-  ctx.fillRect(
-    0,
-    0,
-    size,
-    size
-  );
-
-  for (let i = 0; i < 700; i++) {
-
-    const angle =
-      Math.random() * Math.PI * 2;
-
-    const radius =
-      Math.pow(Math.random(), .65) *
-      size * .43;
-
-    const x =
-      cx + Math.cos(angle) * radius;
-
-    const y =
-      cy + Math.sin(angle) *
-      radius * .42;
-
-    ctx.fillStyle =
-      `rgba(255,255,255,${Math.random() * .55})`;
-
-    ctx.fillRect(
-      x,
-      y,
-      1,
-      1
-    );
-  }
-
-  return new THREE.CanvasTexture(c);
-}
-
-let galaxyTexture;
-
-function createGalaxy(data) {
-
-  if (!galaxyTexture) {
-    galaxyTexture =
-      createGalaxyTexture();
-  }
-
-  const [name, x, y, z] =
-    data;
-
-  const material =
-    new THREE.SpriteMaterial({
-      map: galaxyTexture,
-      transparent: true,
-      opacity: .9,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending
-    });
-
-  const sprite =
-    new THREE.Sprite(material);
-
-  const size =
-    name === "Milky Way"
-      ? 70
-      : 20 + Math.random() * 25;
-
-  sprite.scale.set(
-    size,
-    size * .62,
-    1
-  );
-
-  sprite.position.set(
+function createGalaxy(
     x,
     y,
-    z
-  );
-
-  sprite.userData = {
-    name,
-    type: "GALAXY"
-  };
-
-  scene.add(sprite);
-
-  addObject({
-    name,
-    type: "GALAXY",
-    object: sprite,
-    description:
-      "Catalogue galaxy represented in the COSMOS deep-space layer."
-  });
-}
-
-/* =========================================================
-   PROGRESSIVE GALAXY LOADING
-   ========================================================= */
-
-let galaxyIndex = 0;
-
-function loadGalaxyBatch() {
-
-  if (galaxyIndex >= galaxies.length)
-    return;
-
-  createGalaxy(
-    galaxies[galaxyIndex]
-  );
-
-  galaxyIndex++;
-
-  requestAnimationFrame(
-    loadGalaxyBatch
-  );
-}
-
-setTimeout(
-  loadGalaxyBatch,
-  900
-);
-
-/* =========================================================
-   PLANET POSITION ENGINE
-   ========================================================= */
-
-let selectedDate =
-  new Date();
-
-function daysSinceJ2000(date) {
-
-  return (
-    date.getTime() -
-    Date.UTC(
-      2000,
-      0,
-      1,
-      12
-    )
-  ) / 86400000;
-}
-
-function updatePlanetPositions() {
-
-  const days =
-    daysSinceJ2000(
-      selectedDate
-    );
-
-  for (const item of planetMeshes) {
-
-    const p = item.data;
-
-    const angle =
-      (
-        days /
-        p.period
-      ) *
-      Math.PI *
-      2;
-
-    item.mesh.position.x =
-      Math.cos(angle) *
-      p.distance;
-
-    item.mesh.position.z =
-      Math.sin(angle) *
-      p.distance;
-
-    item.mesh.position.y =
-      Math.sin(angle * .37) *
-      p.distance *
-      .015;
-
-    item.mesh.rotation.y +=
-      .002;
-  }
-}
-
-/* =========================================================
-   TIME UI
-   ========================================================= */
-
-const dateInput =
-  document.getElementById(
-    "dateInput"
-  );
-
-const timeReadout =
-  document.getElementById(
-    "timeReadout"
-  );
-
-function formatDate(date) {
-
-  return date
-    .toLocaleString(
-      undefined,
-      {
-        dateStyle: "medium",
-        timeStyle: "medium"
-      }
-    );
-}
-
-function updateTimeUI() {
-
-  const local =
-    new Date(
-      selectedDate.getTime() -
-      selectedDate.getTimezoneOffset() *
-      60000
-    )
-      .toISOString()
-      .slice(0,16);
-
-  dateInput.value =
-    local;
-
-  timeReadout.textContent =
-    formatDate(
-      selectedDate
-    );
-
-  updatePlanetPositions();
-}
-
-dateInput.addEventListener(
-  "change",
-  () => {
-
-    selectedDate =
-      new Date(
-        dateInput.value
-      );
-
-    updateTimeUI();
-  }
-);
-
-document
-  .getElementById("presentBtn")
-  .onclick = () => {
-
-    selectedDate =
-      new Date();
-
-    updateTimeUI();
-  };
-
-document
-  .getElementById("nowBtn")
-  .onclick = () => {
-
-    selectedDate =
-      new Date();
-
-    updateTimeUI();
-  };
-
-document
-  .getElementById("pastBtn")
-  .onclick = () => {
-
-    selectedDate =
-      new Date(
-        selectedDate.getTime() -
-        365.25 *
-        86400000
-      );
-
-    updateTimeUI();
-  };
-
-document
-  .getElementById("futureBtn")
-  .onclick = () => {
-
-    selectedDate =
-      new Date(
-        selectedDate.getTime() +
-        365.25 *
-        86400000
-      );
-
-    updateTimeUI();
-  };
-
-updateTimeUI();
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
-
-const searchPanel =
-  document.getElementById(
-    "searchPanel"
-  );
-
-const searchInput =
-  document.getElementById(
-    "searchInput"
-  );
-
-const searchResults =
-  document.getElementById(
-    "searchResults"
-  );
-
-document
-  .getElementById("searchBtn")
-  .onclick = () => {
-
-    searchPanel.classList.toggle(
-      "hidden"
-    );
-
-    if (!searchPanel.classList.contains("hidden")) {
-      searchInput.focus();
-    }
-  };
-
-searchInput.addEventListener(
-  "input",
-  () => {
-
-    const query =
-      searchInput.value
-        .trim()
-        .toLowerCase();
-
-    searchResults.innerHTML = "";
-
-    if (!query)
-      return;
-
-    const matches =
-      objects
-        .filter(
-          o =>
-            o.name
-              .toLowerCase()
-              .includes(query)
-        )
-        .slice(0, 12);
-
-    for (const item of matches) {
-
-      const div =
-        document.createElement("div");
-
-      div.className =
-        "result";
-
-      div.innerHTML = `
-        <div class="result-name">
-          ${item.name}
-        </div>
-        <div class="result-type">
-          ${item.type}
-        </div>
-      `;
-
-      div.onclick = () => {
-
-        focusObject(
-          item.object
-        );
-
-        showInfo(
-          item
-        );
-
-        searchPanel.classList.add(
-          "hidden"
-        );
-      };
-
-      searchResults.appendChild(
-        div
-      );
-    }
-  });
-
-/* =========================================================
-   OBJECT FOCUS
-   ========================================================= */
-
-function focusObject(object) {
-
-  const position =
-    new THREE.Vector3();
-
-  object.getWorldPosition(
-    position
-  );
-
-  controls.target.copy(
-    position
-  );
-
-  const direction =
-    camera.position
-      .clone()
-      .sub(position)
-      .normalize();
-
-  camera.position.copy(
-    position
-      .clone()
-      .add(
-        direction.multiplyScalar(
-          Math.max(
-            object.scale.x * 4,
-            8
-          )
-        )
-      )
-  );
-
-  controls.update();
-}
-
-function showInfo(item) {
-
-  const panel =
-    document.getElementById(
-      "infoPanel"
-    );
-
-  const content =
-    document.getElementById(
-      "infoContent"
-    );
-
-  content.innerHTML = `
-    <div class="info-title">
-      ${item.name}
-    </div>
-
-    <div class="info-type">
-      ${item.type}
-    </div>
-
-    <div class="info-line">
-      ${item.description ||
-        "COSMOS astronomical object."}
-    </div>
-  `;
-
-  panel.classList.remove(
-    "hidden"
-  );
-}
-
-document
-  .getElementById("closeInfo")
-  .onclick = () => {
-
-    document
-      .getElementById(
-        "infoPanel"
-      )
-      .classList.add(
-        "hidden"
-      );
-  };
-
-/* =========================================================
-   SCALE BUTTONS
-   ========================================================= */
-
-document
-  .querySelectorAll(
-    "[data-scale]"
-  )
-  .forEach(
-    button => {
-
-      button.onclick = () => {
-
-        const scale =
-          button.dataset.scale;
-
-        if (scale === "system") {
-
-          camera.position.set(
-            0,
-            18,
-            45
-          );
-
-          controls.target.set(
-            0,
-            0,
-            0
-          );
-        }
-
-        if (scale === "galaxy") {
-
-          camera.position.set(
-            0,
-            150,
-            350
-          );
-
-          controls.target.set(
-            0,
-            0,
-            0
-          );
-        }
-
-        if (scale === "universe") {
-
-          camera.position.set(
-            0,
-            900,
-            1800
-          );
-
-          controls.target.set(
-            0,
-            0,
-            0
-          );
-        }
-
-        controls.update();
-      };
-    }
-  );
-
-/* =========================================================
-   CLICK OBJECTS
-   ========================================================= */
-
-const raycaster =
-  new THREE.Raycaster();
-
-const pointer =
-  new THREE.Vector2();
-
-function pointerSelect(
-  event
+    z,
+    size
 ) {
 
-  const rect =
-    canvas.getBoundingClientRect();
+    const geometry =
+        new THREE.BufferGeometry();
 
-  pointer.x =
-    ((event.clientX - rect.left) /
-      rect.width) *
-    2 - 1;
+    const count = 900;
 
-  pointer.y =
-    -((event.clientY - rect.top) /
-      rect.height) *
-    2 + 1;
+    const positions =
+        new Float32Array(
+            count * 3
+        );
 
-  raycaster.setFromCamera(
-    pointer,
-    camera
-  );
+    for (let i = 0; i < count; i++) {
 
-  const hits =
-    raycaster.intersectObjects(
-      scene.children,
-      true
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+        const radius =
+            Math.pow(
+                Math.random(),
+                0.65
+            ) * size;
+
+        positions[i * 3] =
+            Math.cos(angle) *
+            radius;
+
+        positions[i * 3 + 1] =
+            (Math.random() - 0.5) *
+            size *
+            0.15;
+
+        positions[i * 3 + 2] =
+            Math.sin(angle) *
+            radius;
+    }
+
+    geometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(
+            positions,
+            3
+        )
     );
 
-  if (!hits.length)
-    return;
+    const material =
+        new THREE.PointsMaterial({
+            color: 0x9cbcff,
+            size: 0.12,
+            transparent: true,
+            opacity: 0.75
+        });
 
-  let selected =
-    hits[0].object;
+    const galaxy =
+        new THREE.Points(
+            geometry,
+            material
+        );
 
-  while (
-    selected &&
-    !selected.userData?.name &&
-    selected.parent
-  ) {
-    selected =
-      selected.parent;
-  }
+    galaxy.position.set(
+        x,
+        y,
+        z
+    );
 
-  if (
-    selected?.userData?.name
-  ) {
-
-    const found =
-      objects.find(
-        o =>
-          o.object === selected
-      );
-
-    if (found) {
-      showInfo(found);
-    }
-  }
+    scene.add(galaxy);
 }
 
-canvas.addEventListener(
-  "click",
-  pointerSelect
-);
 
-/* =========================================================
+/* Deep-space galaxies are delayed */
+
+setTimeout(() => {
+
+    createGalaxy(
+        250,
+        80,
+        -200,
+        35
+    );
+
+    createGalaxy(
+        -350,
+        -100,
+        -300,
+        45
+    );
+
+    createGalaxy(
+        500,
+        180,
+        -500,
+        30
+    );
+
+}, 1200);
+
+
+/* =========================
    RESIZE
-   ========================================================= */
+========================= */
 
-addEventListener(
-  "resize",
-  () => {
+window.addEventListener(
+    "resize",
+    () => {
 
-    camera.aspect =
-      innerWidth /
-      innerHeight;
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
 
-    camera.updateProjectionMatrix();
+        camera.updateProjectionMatrix();
 
-    renderer.setSize(
-      innerWidth,
-      innerHeight,
-      false
-    );
-
-    renderer.setPixelRatio(
-      innerWidth < 700
-        ? 1
-        : Math.min(
-            devicePixelRatio,
-            1.25
-          )
-    );
-  }
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight,
+            false
+        );
+    }
 );
 
-/* =========================================================
-   RENDER LOOP
-   ========================================================= */
+
+/* =========================
+   RENDER
+========================= */
 
 function animate() {
 
-  requestAnimationFrame(
-    animate
-  );
+    requestAnimationFrame(
+        animate
+    );
 
-  const elapsed =
-    clock.getElapsedTime();
+    controls.update();
 
-  controls.update();
+    stars.rotation.y +=
+        0.00003;
 
-  sun.scale.setScalar(
-    1 +
-    Math.sin(elapsed * 2) *
-    .015
-  );
+    sun.rotation.y +=
+        0.001;
 
-  renderer.render(
-    scene,
-    camera
-  );
+    renderer.render(
+        scene,
+        camera
+    );
 }
 
 animate();
 
-/* =========================================================
-   READY
-   ========================================================= */
 
-document.getElementById(
-  "statusText"
-).textContent =
-  "COSMOS READY — 3D ENGINE ONLINE";
+/* =========================
+   STATUS
+========================= */
+
+const statusText =
+    document.getElementById(
+        "statusText"
+    );
+
+if (statusText) {
+
+    statusText.textContent =
+        "3D ENGINE ONLINE";
+}
